@@ -1,0 +1,37 @@
+---
+title: "week01-in-class-code"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+he above chunk is a global 
+
+
+```{r, echo = F}
+# simple maths with one output
+2+2
+2+3 # have it here
+2+5
+```
+
+```{r}
+# vector maths with a vector output
+
+0+1:100
+```
+
+This an rmd file and will compile to a html file
+
+# Heading 1
+
+## Heading 2
+
+### Heading 3
+
+###### Heading 4
+
+Any text inside of one asterisks is italics. Eg: *italics*
+
+Any text inside two asterisks is bold. Eg: **bold**

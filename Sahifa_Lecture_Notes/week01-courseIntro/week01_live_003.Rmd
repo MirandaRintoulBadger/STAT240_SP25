@@ -1,0 +1,49 @@
+---
+title: "week01-in_class_codes"
+output: html_document
+date: "2025-01-24"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The first paragraph on top is the YAML then it is followed by the global chunk. DO NOT change these things.
+
+Chunk: Is where you put r codes in
+
+2+2
+
+```{r}
+2+2
+2+3
+2+7
+```
+
+```{r}
+#.........................................................................................................
+
+
+2+4 # this creates one output
+1:50 # this creates one output with 50 components
+```
+
+# Heading 1
+
+## Heading 2
+
+### Heading 3
+
+##### Smaller Heading
+
+# Chapter 1
+
+## Section 1
+
+### Subsection
+
+*To emphasis a word and put it in italics we use one asterisks on both side of the word.*
+
+*italics*
+
+Two asterisks on both sides of the text would create bold text. **bold**

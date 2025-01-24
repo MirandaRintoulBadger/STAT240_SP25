@@ -1,0 +1,55 @@
+---
+title: "week01-in_class_codes"
+output: html_document
+date: "2025-01-24"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error = TRUE)
+```
+
+Chunk:
+
+2+2
+
+```{r}
+2+2
+2+3
+2+5
+```
+
+```{r}
+2+4 # simple maths to add two numbers
+1:100 # this is a vector
+```
+
+# Heading 1
+
+## Heading 2
+
+### Heading 3
+
+###### Smaller Heading
+
+# Chapter
+
+## Section 1
+
+### Subsection 1
+
+Put one asteriks on both side of the text to get italics.
+
+Eg: *italic*
+
+Put two asterisks on both sides of the text to get bold.
+
+Eg: **bold**
+
+```{r}
+sqrt(2,2)
+```
+
+sqrt(-1)
+
+
+
