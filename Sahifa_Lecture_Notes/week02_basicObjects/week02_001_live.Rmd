@@ -1,0 +1,304 @@
+---
+title: "week02-in_class_codes"
+output: html_document
+date: "2025-01-27"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error = TRUE, warning = TRUE)
+```
+
+
+# Sec 001
+
+## Monday 01/27
+
+-   Variables:
+
+```{r}
+# Numeric variables
+a <- 3
+A = 3 # different from the variable a, you can also use = to assign value to variables
+
+a_1 <- 3 
+2a <- 9 # wrong way of naming a variable, variable name can't have number in the start
+
+b 2 <- 10 # wrong way of naming a variable, variable name can't have space in between
+
+b.2 <- 10
+b <- -10 # variables can take any real values
+```
+
+```{r}
+# Character variables
+
+name <- "Sahifa"
+sentence <- "name is a Character variable" # character variables can contain long sentences too.
+name <- John # R thinks Sahifa is an existing variable and not the character value you want to assign
+```
+
+```{r}
+# Logical variable
+
+x <- TRUE # or FALSE or NA, they are all in uppercase, shortform of TRUE is just T and FALSE is just F, but it's suggested to use the full word to avoid confusion with any pre-existing variable name.
+
+```
+
+To identify or get the type of a variable
+
+-   'class()'
+
+```{r}
+class(b.2)
+class(b)
+class(sentence)
+class(x)
+```
+
+Logical arguments can be obtained in R by using a logical question to R.
+
+```{r}
+b < b.2
+b > b.2
+```
+
+## Wednesday 01/29
+
+-   Operators:
+
+```{r}
+# Mathematical operators: only works with numeric and logical objects 
+
+# addition '+'
+
+2+3
+name+sentence
+
+# subtraction '-'
+
+2-3
+
+# multiplication '*'
+2*3
+
+# raised to '**', '^'
+
+2**3
+2^3
+
+# division '/'
+
+2/4
+```
+
+```{r}
+TRUE + FALSE # mathematical operations can also be done with logical variables
+
+T + NA # but not with NA
+1+2+3+4+5-NA
+```
+
+```{r}
+# Logical operators: these will work with all types of variables except for NAs
+
+10 < 12 
+0 > 1
+1 >= 1
+1 >= 2
+-1 <= 2
+-1 < 2
+
+-1 = 2 # this would give an error because we are assigning the value of -1 to 2
+
+-1 == 2 # this is for checking equality of two objects
+-1 != 2 # this is for checking unequality
+
+T == T
+b 
+b == NA
+is.na(b)
+name == "Sahifa"
+name != "Sahifa "
+```
+
+```{r}
+# logical operator that only work with logical variables
+
+# & is the 'and' operator
+#\ | is the 'or' operator
+
+T & T
+T & F
+F & T
+F & F
+
+T | T
+T | F
+F | T
+F | F
+
+(a < 4) & (b < 0)
+```
+
+-   Function:
+
+```{r}
+sqrt(16) # Some functions need one input
+sqrt(16, 4)
+mean(c(20, 40, 50, 6, 7, NA))
+
+# Some functions work with several inputs
+sum(2, 4, 5, 6, 7, NA, na.rm = TRUE)
+sum(2, 4, 5, 6, 7)
+```
+
+-   Vectors:
+
+Can be created using:
+
+-   the function `c()` which combines objects/inputs into a list
+
+```{r}
+
+x <- c(2, 3, 4, 5, 6, 10, .10) # a numeric vector
+
+class(x)
+
+z <- c("apple", "banana", "strawberry") # a character vector
+z
+
+class(z)
+
+y <- c(2, 3, "banana", "Sahifa", a, name, TRUE) # we can mix different type of objects in a vector, but the resulting vector is usually a character vector if a character is present
+y
+
+class(y)
+```
+
+# Friday 1/31
+
+- sequences: using the function `seq()`
+
+```{r}
+?seq
+
+odd <- seq(from = 1, to = 20, by = 2)
+
+odd
+
+even <- seq(2, 20, 2)
+
+even
+
+hundred_num_bet_0_1 <- seq(0, 1, length.out = 100) 
+
+hundred_num_bet_0_1
+
+list_1_100 <- seq(to = 100)
+
+list_1_100
+```
+```{r}
+list2 <- 1:100
+
+list_1_100 == list2
+
+100:1
+
+seq(from = 100, to = 1)
+seq(from = 100, to = 1, by = -1)
+```
+
+```{r}
+# calling an object from inside a vector using the index
+
+list2
+
+list2[54]
+
+list2[54,2]
+
+list2[c(2, 5, 54)]
+
+z[3]
+```
+
+
+```{r}
+# adding more object/element to a vector
+
+z
+
+z <- c(z, "kiwi")
+
+z
+
+z[5] = "melon"
+
+z
+```
+
+```{r}
+# replacing objects at a specific index
+
+z[4] <- "oranges"
+
+z
+```
+
+- Operations:
+
+```{r}
+# you can use numeric and logical vectors for mathematical operations
+# must have same length
+
+
+list_1_100 - list2
+
+list_1_100 + list2
+
+even^2
+
+sqrt(even)
+
+log(even)
+
+mean(even)
+```
+
+
+```{r}
+even + 10
+
+even 
+
+even == 12
+
+12 %in% even 
+```
+
+```{r}
+even + list2
+
+x + even
+```
+
+```{r}
+sum(seq(1, 99, by = 2))
+```
+
+
+- Dataframes
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+tibble(num = 1:10, "even or not" = c("odd", "even", "odd", "even", "odd", "even", "odd", "even", "odd", "even"), is_it_Prime = num %in% c(2,3,5,7))
+```
+
+
+
+
+

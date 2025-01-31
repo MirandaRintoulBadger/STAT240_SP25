@@ -1,0 +1,344 @@
+---
+title: "week02-in_class_codes"
+output: html_document
+date: "2025-01-27"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error = TRUE, warning = TRUE)
+```
+
+# Sec 004
+
+-   Variables:
+
+```{r}
+# Numeric variables
+
+a <- 1
+A <- 1
+a = 1
+
+a1 <- 10
+a 1 <- 10 # error because we can't have space in variable names
+a_1 <- -10
+c <- pi
+d <- Inf
+e <- -Inf
+
+1a <- 0 # error because can't use number infront of a variable name
+
+# Character variable
+
+my_name <- Sahifa
+my_name <- "Sahifa"
+sentences <- "it is possible to have sentences as variables in R"
+
+sentences
+
+number <- "2"
+
+number + 3
+
+# Logical variables
+
+x <- TRUE
+y <- FALSE
+v <- NA
+
+```
+
+-   To know the type of variables: 'class()'
+
+```{r}
+class(c)
+class(my_name)
+class(x)
+```
+
+```{r}
+x+1
+my_name + 1
+```
+
+```{r}
+X <- 1:100
+y <- 1:100
+plot(X, y)
+
+class(X)
+```
+- Operators:
+
+```{r}
+# mathematical operators: work with numeric and logical variables except NA
+
+2 + 3 # addition
+
+2 - 3 # subtraction
+
+2 * 3 # multiplication
+
+2 / 3 # division
+
+2 ** 3 # raised to
+2 ^ 3 # raised to
+
+TRUE + T
+T + F
+
+"Sahifa" + "banana"
+cat("Sahifa", "banana")
+```
+
+```{r}
+# Logical Operators: work with numeric, logical and character except NA
+
+2 < 5
+2 <= 2
+2 >= 3
+3 > 2
+
+2 = 2
+```
+
+```{r}
+2 == 2
+b = T
+b == T
+
+2 != 3
+2 != 2
+T != F
+
+name <- "Sahifa"
+name == "Sahifa"
+name == "Sahifa "
+```
+
+```{r}
+# logical operator for 'and' is '&'
+
+T & T
+T & F
+F & T
+F & F
+```
+```{r}
+# the logical operator for 'or' is '|'
+
+T | T 
+T | F
+F | T 
+F | F
+```
+
+```{r}
+a <- 2
+c <- -10
+
+(a < 3) & (c < 0)
+```
+
+
+```{r}
+2 + NA
+(2 + 2 + 3 + 5) / NA
+missing_value <- NA 
+
+missing_value == NA
+is.na(missing_value)
+!is.na(missing_value)
+```
+
+- Function: `function_name(argument1, argument2)`
+
+```{r}
+is.na(b)
+sqrt(16)
+sqrt(16, 2)
+?sqrt
+sum(1,2,3,4,5)
+?sum
+sum(1,2,3,4,5,NA, na.rm = T)
+mean(1,2,3,4,5)
+```
+
+- Vectors: list of objects that get stored under one name
+
+- using the function `c()`, combines all the list of objects into a vector
+
+```{r}
+first_5_even_num <- c(2, 4, 6, 8, 10)
+class(first_5_even_num)
+
+fruits <- c("apple", "banana", "cherry")
+
+random <- c(2, 1000, TRUE, "Sahifa")
+
+random2 <- c(2, 1, 1000, TRUE, F)
+
+random3 <- c(T, F, 30, NA)
+
+is.na(random3)
+```
+
+# Friday 1/31
+
+- using the function `seq()`
+
+```{r}
+?seq
+
+seq(0,10)
+
+seq(0, 10, 3)
+
+seq(by = 3, to = 10, from = 0)
+
+list_0_1 <- seq(0, 1, length.out = 20)
+
+list_0_1
+
+seq(0, 1, length.out = 10)
+
+seq(from = 10, to = 1)
+
+seq(1, 10, -1)
+
+seq(10, 1, -2)
+```
+
+- using `:`
+
+```{r}
+1:10
+0.5:20
+weird <- pi:21
+21: pi
+```
+
+
+
+```{r}
+# calling obejcts from a vector using the index/placeholder
+
+weird
+
+weird[2]
+
+fruits
+
+fruits[3]
+
+weird[1, 5, 9, 13, 17]
+
+weird[c(1, 5, 9, 13, 17)]
+```
+
+
+
+```{r}
+# adding objects/elements to existing vectors
+
+fruits
+
+fruits <- c(fruits, "dragonfruit")
+
+fruits
+
+fruits[5] <- "elderberry"
+
+fruits[c(6,7)] <- c("fig", "grape")
+
+fruits
+```
+
+```{r}
+# replacing objects inside vector using placeholder
+
+fruits[2] <- "blueberries"
+
+fruits
+```
+
+- Operations on a vector
+
+```{r}
+# the vector need to be numeric or logical
+# they have to be of the same length
+
+firstThreeNum <- 1:3
+nextThreeNum <- 4:6
+
+firstThreeNum + nextThreeNum
+
+length(firstThreeNum)
+length(nextThreeNum)
+
+firstThreeNum^2
+
+log(firstThreeNum)
+
+sqrt(firstThreeNum)
+
+mean(firstThreeNum)
+```
+
+
+```{r}
+length(list_0_1)
+
+firstThreeNum + list_0_1
+
+new <- seq(2, 20, length.out = 12)
+
+new
+
+firstThreeNum
+
+new + firstThreeNum
+```
+
+```{r}
+# logical operator
+new
+
+new == 5
+
+new == 20
+
+20 %in% new
+
+5 %in% new 
+```
+
+```{r}
+sum(seq(1, 99, by = 2))
+```
+
+
+- Dataframes
+
+- basic R function `data.frame()`
+- we will use the function `tibble()` from the package `tidyverse`
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+?tibble
+
+data <- tibble(num = 1:10, "even or odd" = c("odd", "even", "odd", "even", "odd", "even", "odd", "even", "odd", "even"), isItPrime = num %in% c(2, 3, 5, 7))
+```
+
+
+
+
+
+
+
+
+
