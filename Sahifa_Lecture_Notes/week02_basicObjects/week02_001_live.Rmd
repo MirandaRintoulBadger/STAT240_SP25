@@ -290,12 +290,24 @@ sum(seq(1, 99, by = 2))
 
 - Dataframes
 
+   - using the function `tibble()` from the tidyverse package we can create dataframes.
+
 ```{r}
 library(tidyverse)
 ```
 
 ```{r}
-tibble(num = 1:10, "even or not" = c("odd", "even", "odd", "even", "odd", "even", "odd", "even", "odd", "even"), is_it_Prime = num %in% c(2,3,5,7))
+numbers <- tibble(num = 1:10, "even or not" = c("odd", "even", "odd", "even", "odd", "even", "odd", "even", "odd", "even"), IsItaPrime = num %in% c(2, 3, 5, 7))
+
+numbers
+```
+
+   - Calling/loading datasets directly from the computer using the function `read_csv(path of the file on the computer)`
+
+```{r}
+monona <- read_csv("../../data/lake-monona-winters-2024.csv") # use if you are in the right directory which is the week02 lecture notes folder
+
+monona <- read_csv("~/Desktop/STAT240/data/lake-monona-winters-2024.csv") # use if you can't find the directory. (this works for MAC, for Windows it's best to copy the initial path uptill STAT240 folder from the getwd output)
 ```
 
 
