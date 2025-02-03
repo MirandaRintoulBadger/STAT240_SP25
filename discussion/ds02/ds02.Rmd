@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 -   You should download `lake-monona-winters-2024.csv` to `STAT240/data`.
 
--   This assignment should be completed in your **discussion groups**/**informal discussion groups**.
+-   This assignment should be completed in your **discussion groups** or **informal discussion groups**.
 
 -   You are responsible for making sure your name appears in the final submission.
 
