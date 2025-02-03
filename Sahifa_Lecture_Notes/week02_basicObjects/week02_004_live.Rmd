@@ -10,6 +10,8 @@ knitr::opts_chunk$set(echo = TRUE, error = TRUE, warning = TRUE)
 
 # Sec 004
 
+## Monday 1/27
+
 -   Variables:
 
 ```{r}
@@ -333,6 +335,35 @@ library(tidyverse)
 
 data <- tibble(num = 1:10, "even or odd" = c("odd", "even", "odd", "even", "odd", "even", "odd", "even", "odd", "even"), isItPrime = num %in% c(2, 3, 5, 7))
 ```
+
+## Monday 2/3
+
+- Callin/loading datasets from the desktop onto RStudio we will use the function `read_csv("path of the file on the computer")` from the package `tidyverse`
+
+```{r}
+mendota <- read_csv("../../data/lake-mendota-winters-2024.csv") # this works only if you have your directory setup in the right way
+
+mendota <- read_csv("~/Desktop/STAT240/data/lake-mendota-winters-2024.csv") # this is for MAC users. for windows use getwd() then copy everything from the start till OneDrive paste it in place of `~/`
+```
+
+- Functions that can be used to visualize or understand the data: View(name of the data), head(name of the data), etc
+
+- extracting columns from data as vectors using `$` operator
+
+```{r}
+mendota$year1
+
+mendota$duration
+```
+
+-  the placeholder can be used to extract columns or rows or cells from a dataset. It extracts the information as a dataset
+
+```{r}
+year1 = mendota$year1
+
+year_1 <- mendota[ , 2]
+```
+
 
 
 
