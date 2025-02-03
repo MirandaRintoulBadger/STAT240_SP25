@@ -325,6 +325,9 @@ library(tidyverse)
 
 data <- tibble(num = 1:10, "even or odd" = c("odd", "even", "odd", "even", "odd", "even", "odd", "even", "odd", "even"), "isItPrime" = num %in% c(2, 3, 5, 7))
 ```
+
+##  Monday 2/3
+
 - Calling/loading datasets from the computer onto RStudio using the function `read_csv(path to dataset file on the computer)` from the `tidyverse` package
 
 ```{r}
