@@ -302,6 +302,8 @@ numbers <- tibble(num = 1:10, "even or not" = c("odd", "even", "odd", "even", "o
 numbers
 ```
 
+# Monday 2/3
+
    - Calling/loading datasets directly from the computer using the function `read_csv(path of the file on the computer)`
 
 ```{r}
