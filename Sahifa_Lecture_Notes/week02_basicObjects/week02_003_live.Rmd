@@ -325,7 +325,29 @@ library(tidyverse)
 
 data <- tibble(num = 1:10, "even or odd" = c("odd", "even", "odd", "even", "odd", "even", "odd", "even", "odd", "even"), "isItPrime" = num %in% c(2, 3, 5, 7))
 ```
+- Calling/loading datasets from the computer onto RStudio using the function `read_csv(path to dataset file on the computer)` from the `tidyverse` package
 
+```{r}
+mendota <- read_csv("../../data/lake-mendota-winters-2024.csv") # set the correct working directory
+
+mendota <- read_csv("~/Desktop/STAT240/data/lake-mendota-winters-2024.csv") # thsi is going to work for any working directory. for windows user, instead of ~/ use the initial part of getwd output till OneDrive
+```
+
+- Functions that can be used to visualize or understand the data: View(name of the data), head(name of the data), etc
+
+- extracting columns from data as vectors using `$` operator
+```{r}
+mendota$winter
+```
+
+
+```{r}
+# the placeholder can be used to extract columns or rows or cells from a dataset. It extracts the information as a dataset
+
+mendota[ , 1]
+mendota[169, ]
+mendota[169,2]
+```
 
 
 
