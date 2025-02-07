@@ -1,0 +1,253 @@
+---
+title: "week03-sec001"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+
+
+# Sec 004
+
+## Monday 2/3
+
+```{r}
+mendota <- read_csv("../../data/lake-mendota-winters-2024.csv")
+monona <- read_csv("../../data/lake-monona-winters-2024.csv")
+```
+
+
+```{r}
+ggplot(mendota, mapping = aes(x = year1, y = duration)) + geom_point(color = "red") + geom_smooth() + theme_bw()
+
+ggplot() + geom_point(mendota, mapping = aes(x = year1, y = duration), color = "red") + geom_point(monona, mapping = aes(x = year1, y = duration), color = "blue")
+```
+
+- First layer:
+
+```{r}
+ggplot()
+
+ggplot(mendota, mapping = aes(x = year1, y = duration))
+```
+
+- Second layer: using the `geom_functions()`
+
+```{r}
+ggplot(mendota, mapping = aes(x = year1, y = duration)) + 
+  geom_point() 
+
+ggplot(mendota, mapping = aes(x = year1, y = duration)) + 
+  geom_point() + 
+  geom_line()
+```
+
+# Wednesday 2/5
+
+## Aesthetics:
+
+- variable vs constant:
+
+```{r}
+ggplot(mendota, aes(x = year1, y = duration, color = intervals)) +
+  geom_point() # variable aes
+
+ggplot(mendota, aes(x = year1, y = duration)) +
+  geom_point(mapping = aes(color = intervals)) 
+
+ggplot(mendota, aes(x = year1, y = duration)) +
+  geom_point(color = "blue") # constant aesthetic
+```
+
+- global vs local aesthetic:
+
+```{r}
+# global aesthetic is put inside of ggplot
+
+ggplot(mendota, aes(x = year1, y = duration, color = intervals, size = intervals)) +
+  geom_point() +
+  geom_line()
+
+# local aesthetic is the ones that go into each geom_functions
+
+ggplot(mendota, aes(x = year1, y = duration)) +
+  geom_point(color = "blue", size = 3) +
+  geom_line(color = "red", linetype = "dashed")
+```
+
+- order of the geom_functions
+
+```{r}
+ggplot(mendota, aes(x = year1, y = duration)) +
+  geom_point(color = "blue", size = 3) +
+  geom_line(color = "red")
+
+ggplot(mendota, aes(x = year1, y = duration)) +
+  geom_line(color = "red") +
+  geom_point(color = "blue", size = 3)
+```
+
+- Alpha:
+
+```{r}
+ggplot(mendota, aes(duration)) +
+  geom_histogram(
+    aes(y = after_stat(density)), # This line shrinks the histogram's height to be on the same scale as geom_density; out of scope of this course, no need to worry about it
+    color = "steelblue4",
+    fill = "skyblue1"
+  ) +
+  geom_density(
+    fill = "red1",
+    alpha = 0.3, # Transparency... the density plot is "on top"
+    size = 2
+  )  
+
+ggplot(mendota, aes(duration)) +
+  geom_density(
+    fill = "green",
+    size = 2
+  ) +
+  geom_histogram(
+    aes(y = after_stat(density)), # This line shrinks the histogram's height to be on the same scale as geom_density; out of scope of this course, no need to worry about it
+    color = "steelblue4",
+    fill = "skyblue1",
+    alpha = 0.5
+  )
+```
+
+
+# Geom_functions:
+
+- `geom_smooth()`: used to create a trendline
+
+```{r}
+ggplot(mendota, aes(x = year1, y = duration)) +
+  geom_point() +
+  geom_smooth()
+
+ggplot(mendota, aes(x = year1, y = duration)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+ggplot(mendota, aes(x = year1, y = duration)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+- `geom_col()`
+
+
+```{r}
+mendota = mendota %>% 
+  mutate(century = as.character(floor(year1/100)+1),
+         century = case_when(
+           century == "19" ~ "19th",
+           century == "20" ~ "20th",
+           century == "21" ~ "21st"
+         )) 
+
+mendota_summarized = mendota %>% 
+  group_by(century) %>% 
+  summarize(numYears = n(), avgDuration = mean(duration))
+
+ggplot(mendota_summarized, aes(century, avgDuration)) +
+  geom_col()
+
+ggplot(mendota_summarized, aes(century, numYears)) +
+  geom_col(color = "blue", # to change the outline of the bars
+           fill = "skyblue" # to change the inside of the bars
+           )
+```
+
+## One Variable Plots
+
+- `geom_histogram()`
+
+```{r}
+ggplot(mendota, aes(duration)) +
+  geom_histogram(fill = "skyblue", color = "blue")
+
+ggplot(mendota, aes(duration)) +
+  geom_histogram(fill = "skyblue", color = "blue", binwidth = 10)
+
+ggplot(mendota, aes(duration)) +
+  geom_histogram(fill = "skyblue", 
+                 color = "blue", 
+                 binwidth = 10,
+                 center = 45)
+
+ggplot(mendota, aes(duration)) +
+  geom_histogram(fill = "skyblue", 
+                 color = "blue", 
+                 binwidth = 10,
+                 boundary = 40)
+```
+
+- `geom_bar()`
+
+```{r}
+ggplot(mendota, aes(century)) +
+  geom_bar() +
+  labs(y = "Number of years in century")
+```
+
+- geom_density(): cont var
+
+```{r}
+ggplot(mendota, aes(duration)) +
+  geom_density()
+
+ggplot(mendota, aes(duration)) +
+  geom_density(fill = "red") + geom_histogram(mapping = aes(y = after_stat(density)), color = "black", fill = "white", alpha = 0.7)
+```
+
+- geom_boxplot: 
+
+```{r}
+ggplot(mendota, aes(duration)) +
+  geom_boxplot()
+```
+with x = duration make a histogram , fill = century
+
+```{r}
+ggplot(mendota, aes(duration, fill = century)) +
+  geom_histogram(mapping = aes(y = after_stat(density)), color = "black") +
+  geom_density()
+```
+
+# Faceting
+
+- facet_wrap:
+
+```{r}
+ggplot(mendota, aes(duration, fill = as.factor(intervals))) +
+  geom_histogram(mapping = aes(y = after_stat(density)), color = "black", bins = 20) +
+  geom_density(alpha = 0.7) +
+  facet_wrap(facets = vars(century))
+```
+- facet_grids:
+
+```{r}
+ggplot(mendota, aes(duration, fill = century)) +
+  geom_density() +
+  facet_grid(rows = vars(decade), cols = vars(century))
+
+ggplot(mendota, aes(duration, fill = century)) +
+  geom_density() +
+  facet_grid(rows = vars(decade))
+```
+
+
+```{r}
+ggplot(mendota, aes(duration)) +
+  geom_histogram(color = "black", fill = "white") +
+  scale_x_continuous(
+    breaks = c(30, 60, 90, 120, 150),
+    labels = c("1 month", "2 months", "3 months", "4 months", "5 months")
+  )
+```
+
+
