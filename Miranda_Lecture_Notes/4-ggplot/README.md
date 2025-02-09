@@ -1,1 +1,1 @@
-Miranda's lecture files for section 2 (creating data visualizations with ggplot2).
+Miranda's lecture files for section 4 (creating data visualizations with ggplot2).
