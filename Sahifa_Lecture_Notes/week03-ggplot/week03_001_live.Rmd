@@ -221,6 +221,51 @@ ggplot(mendota, aes(duration))+
   )
 ```
 
+# Monday 2/10
+
+- PLot labels: `labs()`
+
+```{r}
+ggplot(mendota, aes(duration))+
+  geom_histogram(color = "black", fill = "white") +
+  scale_x_continuous(  # will change the scale 
+    breaks = c(30, 60, 90, 120),
+    labels = c("1 month", "2 months", "3 months", "4 months")
+  ) + 
+  labs(  # will give labels
+    title = "Histogram for the duration of lake freezing",
+    x = "duration (in days)",
+    y = "frequency"
+  ) +
+  theme_minimal() # will change theme
+
+x = mean(mendota$duration)
+
+ggplot(mendota, aes(duration))+
+  geom_histogram(color = "black", fill = "white") +
+  scale_x_continuous(  # will change the scale 
+    breaks = c(30, 60, 90, 120),
+    labels = c("1 month", "2 months", "3 months", "4 months")
+  ) + 
+  labs(  # will give labels
+    title = "Histogram for the duration of lake freezing",
+    x = "duration (in days)",
+    y = "frequency"
+  ) +
+  theme_minimal() +
+  geom_vline(xintercept = x, color = "red", linetype = "dashed")
+```
+
+
+```{r}
+ggplot(mendota, aes(year1, duration, color = intervals)) +
+  geom_point()
+
+ggplot(mendota, aes(year1, duration, color = as.factor(intervals))) +
+  geom_point() +
+  labs(color = "intervals")
+```
+
 
 
 
