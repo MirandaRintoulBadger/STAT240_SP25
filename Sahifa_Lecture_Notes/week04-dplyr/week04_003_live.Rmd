@@ -1,0 +1,210 @@
+---
+title: "week04_in_class_notes"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error = TRUE)
+
+library(tidyverse)
+library(magrittr)
+```
+
+
+## Pipe operator
+
+- `%>%` is known as the pipe operator
+
+Mac: `cmd+shift+M`
+Window: `ctrl+shift+M`
+
+- x %>% f()  -> f(x)
+- x %>% f() %>% g() -> f(x) %>% g() -> g(f(x))
+- x %>% f(y) %>% g(z) -> f(x, y) %>% g(z) %>% g(f(x, y), z)
+
+Example:
+
+$$\sqrt{\frac{(3+4)^2}{7}}$$
+
+```{r}
+sqrt(divide_by(raise_to_power(add(3,4),2), 7))
+
+3 %>% add(4) %>% raise_to_power(2) %>% divide_by(7) %>% sqrt()
+```
+
+## Load the dataset
+
+```{r}
+grocery_list <- read_csv("../../data/grocery-list.csv")
+grocery_prices <- read_csv("../../data/grocery-prices.csv")
+```
+
+```{r}
+produce <- grocery_list %>% left_join(grocery_price, by = "item")
+
+produce
+```
+
+# Wednesday 2/12
+
+## Column editors
+
+- `mutate()`: adds a column 
+
+```{r}
+produce1 = produce %>% mutate(cost = quantity*price, tax = 0.05*cost, total_cost = cost+tax, index = 1:10)
+
+produce1 %>% select(item, total_cost)
+
+produce1 %>% select(- c(quantity:tax), -index)
+```
+
+- `select()`: selecting specific columns from the dataset
+
+```{r}
+produce %>% 
+  mutate(cost = quantity*price, tax = 0.05*cost, total_cost = cost+tax, index = 1:10) %>% 
+  select(item, price, total_cost)
+
+produce1 %>% 
+  select(item, price, total_cost)
+
+
+```
+
+- `relocate()`: relocates columns in your dataset
+
+```{r}
+produce1
+
+produce1 %>% relocate(index, quantity)
+
+produce1 %>% relocate(index) %>% relocate(cost, tax, total_cost, .before = type)
+```
+- `rename()`: renaming of columns. `new name = old name`
+
+```{r}
+produce1 %>% rename(sales_tax = tax, n = quantity)
+
+produce1 %>% rename(quantity = n) # gives error if you put old name = new name
+```
+
+```{r}
+produce %>% mutate(index = 1:10, cost = quantity*price, tax = 0.05*cost, total_cost = cost+tax) %>% 
+  relocate(index) %>% 
+  select(-type)
+```
+
+## Rows editors
+
+- `arrange()`: arranges columns by default in the ascending order. use the function `desc()` or the `-` sign (just for the numeric variable) to arrange in descending order
+
+
+```{r}
+produce %>% arrange(price)
+produce %>% arrange(-price) #arrange(desc(price))
+produce %>% arrange(desc(item))
+produce %>% arrange(-item) # gives errors since it is a character column
+```
+
+- `filter()`:filters rows depending on the condition provided, logical operators are used to provide the condition or logical argument
+
+```{r}
+produce1 %>% filter(cost>7)
+produce1 %>% filter(quantity > 2 & total_cost < 4) 
+```
+
+```{r}
+produce %>% filter(type == "fruit")
+
+produce %>% filter(price+5)
+```
+
+- `drop_na()`
+
+```{r}
+starwars
+
+starwars %>% drop_na(hair_color)
+
+starwars %>% drop_na()
+
+starwars %>% filter(!is.na(mass), !is.na(hair_color))
+```
+
+# Friday 2/14
+
+## summarize()
+
+```{r}
+sum(1:10)
+sqrt(1:10)
+
+produce1 %>% summarize(total_Spent = sum(total_cost), median = median(total_cost))
+
+produce1 %>% filter(type == "fruit") %>% summarize(total_spent_fruit = sum(total_cost))
+
+produce1 %>% filter(type == "vegetable") %>% summarize(total_spent_fruit = sum(total_cost))
+```
+```{r}
+produce1
+
+produce1 %>% group_by(type) %>% summarize(total_spent = sum(total_cost), avg_spent = mean(total_cost))
+
+produce1 %>% group_by(price < 1) %>% summarize(total_spent = sum(total_cost), avg_spent = mean(total_cost))
+```
+## case_when
+
+```{r}
+produce2 <- produce1 %>% mutate(group = case_when(
+  price <= 1 ~ "price less than or equal to $1",
+  price > 1 & price <= 2 ~ "price between $1 and $2",
+  price > 2 ~ "price more that $2"
+)) 
+
+produce2 %>% group_by(group) %>% summarize(total_spent = sum(total_cost))
+```
+
+
+```{r}
+produce2 %>% summarize(num_Items = n())
+
+produce2 %>% group_by(group) %>% summarize(num_Items = n())
+
+produce2 %>% group_by(group) %>% count() %>% rename(num_items = n)
+
+produce2 %>% group_by(group) %>% summarize(num_Items = n(), total_spent = sum(total_cost))
+```
+
+```{r}
+produce2 %>% summarize(num_Items = n())
+
+produce2 %>% count()
+```
+
+
+```{r}
+produce2 %>% group_by(group) %>% summarize(total_spent = sum(total_cost))
+
+produce2 %>% group_by(group) %>% mutate(total_spent = sum(total_cost))
+
+produce2 %>% mutate(total_spent = sum(total_cost))
+```
+
+## slice_max and slice_min
+
+```{r}
+produce2 %>% slice_max(total_cost, n =3)
+
+produce2 %>% group_by(type) %>% slice_max(total_cost, n=3)
+```
+
+
+
+
+
+
+
+
+
+

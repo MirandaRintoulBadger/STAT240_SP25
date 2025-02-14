@@ -1,0 +1,234 @@
+---
+title: "week04_in_class_notes"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error = TRUE, warning = TRUE)
+library(tidyverse)
+library(magrittr)
+```
+
+## Pipe operator:
+
+-   `%>%` is called the pipe operator
+    -   Mac: `cmd+shift+M`
+    -   Window: `ctrl+shift+M`
+-   Working
+    -   x %\>% f() -\> f(x)
+    -   x %\>% f() %\>% g() -\> f(x) %\>% g() -\> g(f(x))
+    -   x %\>% f(y) %\>% g(z) -\> f(x,y) %\>% g(z) -\> g(f(x,y),z)
+
+Example: Calculating this using the pipe operator
+
+$$\sqrt{\frac{(3+4)^2}{3}}$$
+
+```{r}
+3 %>% add(4) %>% raise_to_power(2) %>% divide_by(3) %>% sqrt()
+
+sqrt(divide_by(raise_to_power(add(3, 4), 2), 3))
+```
+
+## Read in the datasets:
+
+```{r}
+grocery_list <- read_csv("../../data/grocery-list.csv")
+grocery_price <- read_csv("../../data/grocery-prices.csv")
+```
+```{r}
+produce <- grocery_list %>% left_join(grocery_price, by = "item")
+
+produce
+```
+
+# Wednesday 2/12
+
+## Column editors
+
+- `mutate()`: adds a column 
+
+```{r}
+produce1 = produce %>% mutate(cost = quantity*price, tax = 0.05*cost, total_cost = cost+tax, index = 1:10)
+```
+
+- `select()`: selecting specific columns from the dataset
+
+```{r}
+produce %>% 
+  mutate(cost = quantity*price, tax = 0.05*cost, total_cost = cost+tax, index = 1:10) %>% 
+  select(item, price, total_cost)
+
+produce1 %>% 
+  select(item, price, total_cost)
+```
+
+- `relocate()`: relocates columns in your dataset
+
+```{r}
+produce1
+
+produce1 %>% relocate(index, quantity)
+
+produce1 %>% relocate(index) %>% relocate(cost, tax, total_cost, .before = type)
+```
+- `rename()`: renaming of columns. `new name = old name`
+
+```{r}
+produce1 %>% rename(sales_tax = tax, n = quantity)
+
+produce1 %>% rename(quantity = n) # gives error if you put old name = new name
+```
+
+```{r}
+produce %>% mutate(index = 1:10, cost = quantity*price, tax = 0.05*cost, total_cost = cost+tax) %>% 
+  relocate(index) %>% 
+  select(-type)
+```
+
+## Rows editors
+
+- `arrange()`: arranges columns by default in the ascending order. use the function `desc()` or the `-` sign (just for the numeric variable) to arrange in descending order
+
+
+```{r}
+produce %>% arrange(price)
+produce %>% arrange(-price) #arrange(desc(price))
+produce %>% arrange(desc(item))
+produce %>% arrange(-item) # gives errors since it is a character column
+```
+
+- `filter()`:filters rows depending on the condition provided, logical operators are used to provide the condition or logical argument
+
+```{r}
+produce1 %>% filter(cost>7)
+produce1 %>% filter(quantity > 2 & total_cost < 4) 
+```
+
+```{r}
+produce %>% filter(type == "fruit")
+
+produce %>% filter(price+5)
+```
+
+- `drop_na()`
+
+```{r}
+starwars
+
+starwars %>% drop_na(hair_color)
+
+starwars %>% drop_na()
+
+starwars %>% filter(!is.na(mass), !is.na(hair_color))
+```
+
+
+## Exercise
+
+“Show me just the fruits.”
+
+```{r}
+produce %>% filter(type == "fruit")
+```
+
+
+“Can you put whether it’s a fruit or vegetable at the beginning?”
+
+```{r}
+produce %>% relocate(type)
+```
+
+
+
+“I only care about the food name and the total cost, can you get rid of everything else?”
+
+
+```{r}
+produce %>% mutate(total_cost = (1+0.05)*quantity*price) %>% select(item, total_cost)
+
+produce %>% mutate(total_cost = (1+0.05)*quantity*price) %>% select(-c(quantity:type))
+```
+
+
+“Can you put the foods in the opposite alphabetical order so apple is last?”
+
+```{r}
+produce %>% arrange(desc(item))
+```
+
+
+“Can you give each food a sale price that’s half off the normal price?”
+
+```{r}
+produce %>% mutate(sale_price = 0.5*price)
+```
+
+```{r}
+sum(1:10)
+mean(1:10)
+
+sqrt(1:10)
+```
+
+
+```{r}
+produce1 %>% summarize(Total_spent = sum(total_cost), avg = mean(total_cost))
+
+produce1 %>% filter(type == "fruit") %>% summarize(total_cost_fruit = sum(total_cost))
+```
+
+
+```{r}
+produce1
+produce1 %>% group_by(type) %>% summarise(avg_spent = mean(total_cost))
+
+produce1 %>% group_by(type) %>% mutate(avg_spent = mean(total_cost)) %>% relocate(avg_spent)
+
+produce1 %>% group_by(type) %>% slice_max(total_cost, n = 3)
+produce1 %>% group_by(type) %>% slice_min(total_cost, n = 3)
+```
+
+
+```{r}
+produce1 %>% summarise(avg_spent = mean(total_cost), num_elements = n())
+
+produce1 %>% group_by(type) %>% summarise(avg_spent = mean(total_cost), num_elements = n())
+
+produce1 %>% group_by(type) %>% summarise(num_elements = n())
+
+produce1 %>% group_by(type) %>% count()
+```
+
+```{r}
+produce1 %>% group_by(price < 1) %>% summarise(total_spent = sum(total_cost))
+```
+
+```{r}
+produce2 <- produce1 %>% mutate(group = case_when(
+  price <= 1 ~ "less than or eq to $1",
+  price >1 & price <=2 ~ "between $1 and $2",
+  price > 2 ~ "more than $2"
+)) %>% relocate(group)
+
+produce2 %>% group_by(group) %>% summarise(total_spent = sum(total_cost))
+```
+
+```{r}
+students = tibble(
+  name = c("A", "B", "C", "D", "E", "F"),
+  age = 17:22
+) %>% 
+  slice_sample(n = 6)
+
+students %>% mutate(legal_status = case_when(
+  age <= 17 ~ "Can't vote or drink",
+  age >= 18 & age < 21 ~ "Can vote but can't drink",
+  age >= 21 ~ "Can vote and drink"
+))
+```
+
+
+
+
+
+
