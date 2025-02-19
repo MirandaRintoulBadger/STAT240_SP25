@@ -1,0 +1,103 @@
+---
+title: "week05_001-live"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error = TRUE)
+library(tidyverse)
+```
+
+datasets
+
+```{r}
+drinks = tibble(
+  Row = 1:4,
+  Drink = c("Milk Tea", "Espresso", "Latte", "Espresso"),
+  Cafe = c("Happy Tea", "Daily Grind", "Daily Grind", "Bev's Beverages"),
+  Price = c(4, 2, 3, 2)
+)
+
+drinks
+```
+
+```{r}
+discounts = tibble(
+  Row = 1:3,
+  Coupon = c("25%", "50%", "5%"),
+  Cafe = c("Happy Tea", "Daily Grind", "The Roast")
+)
+
+discounts
+```
+
+## Mutating join
+
+- `left_join`
+
+```{r}
+left_join(drinks, discounts, by = join_by("Cafe")) # lose information abiut the 2nd dataset and the rows that didn't have information in the second dataset will have NAs in it.
+```
+
+```{r}
+left_join(drinks, discounts)
+```
+
+```{r}
+right_join(drinks, discounts, by = join_by("Cafe"))
+```
+
+
+- `full_join`
+
+```{r}
+drinks %>% full_join(discounts, by = join_by("Cafe"))
+
+bind_rows(drinks, discounts)
+```
+
+```{r}
+drinks %>% inner_join(discounts, by = join_by("Cafe"))
+```
+
+```{r}
+discounts1 <- discounts %>% rename(Locations = Cafe)%>% select(-Row)
+
+discounts1 
+```
+
+```{r}
+drinks %>% left_join(discounts1, by = join_by(Cafe == Locations))
+
+drinks %>% left_join(discounts1, by = Cafe == Locations) # the common column names have to be inside the join_by function
+
+drinks %>% left_join(discounts, by = "Row")
+```
+
+## Filtering join
+
+```{r}
+drinks %>% semi_join(discounts, by = "Cafe") # it only filters out rows of the first dataset that match with the second dataset
+```
+
+```{r}
+drinks %>% inner_join(discounts, join_by("Cafe"))
+```
+
+
+
+```{r}
+drinks %>% anti_join(discounts, by = "Cafe")
+```
+
+```{r}
+left_join(drinks, discounts, join_by(Cafe))
+right_join(discounts, drinks, join_by(Cafe))
+```
+
+
+
+
+
+
+

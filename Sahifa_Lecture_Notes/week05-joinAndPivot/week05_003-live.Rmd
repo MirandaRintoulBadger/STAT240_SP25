@@ -1,0 +1,108 @@
+---
+title: "week05_003-live"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error = TRUE)
+library(tidyverse)
+```
+
+# datasets
+
+```{r}
+drinks = tibble(
+  Row = 1:4,
+  Drink = c("Milk Tea", "Espresso", "Latte", "Espresso"),
+  Cafe = c("Happy Tea", "Daily Grind", "Daily Grind", "Bev's Beverages"),
+  Price = c(4, 2, 3, 2)
+)
+drinks
+```
+
+```{r}
+discounts = tibble(
+  Row = 1:3,
+  Coupon = c("25%", "50%", "5%"),
+  Cafe = c("Happy Tea", "Daily Grind", "The Roast")
+)
+discounts
+```
+
+## mutating joins
+
+- `left_join()`
+
+```{r}
+left_join(drinks, discounts, by = "Cafe")
+```
+
+```{r}
+left_join(drinks, discounts)
+```
+
+
+- `right_join()`
+
+```{r}
+right_join(drinks, discounts, by = "Cafe")
+```
+
+- `full_join()`
+
+```{r}
+full_join(drinks, discounts, by = "Cafe")
+full_join(discounts, drinks, by = "Cafe")
+```
+- `inner_join()`
+
+```{r}
+inner_join(drinks, discounts, by = "Cafe")
+```
+
+```{r}
+discounts1 <- discounts %>% rename(Locations = Cafe) %>% select(-Row)
+
+discounts1
+```
+
+```{r}
+left_join(drinks, discounts1, by = join_by(Cafe == Locations))
+```
+
+
+## filtering joins
+
+- `semi_join()`
+
+```{r}
+drinks %>% semi_join(discounts, by = "Cafe")
+
+drinks %>% inner_join(discounts, by = "Cafe")
+```
+
+- `anti_join()`
+
+```{r}
+drinks %>% anti_join(discounts, by = join_by(Cafe))
+
+discounts %>% anti_join(drinks, by = join_by(Cafe))
+```
+## Exercise
+
+```{r}
+band_instruments
+```
+```{r}
+band_members
+```
+
+```{r}
+inner_join(band_instruments, band_members)
+```
+
+
+
+
+
+
