@@ -185,7 +185,7 @@ ggplot(mendota, aes(x = duration, y = year1))+
             color = "red")
 ```
 
-
+# End of Midterm 1 portion
 
 
 
