@@ -8,7 +8,9 @@ knitr::opts_chunk$set(echo = TRUE, error = TRUE)
 library(tidyverse)
 ```
 
-# datasets
+# Wednesday
+
+##datasets
 
 ```{r}
 drinks = tibble(
@@ -100,6 +102,104 @@ band_members
 ```{r}
 inner_join(band_instruments, band_members)
 ```
+
+## Pivoting
+
+```{r}
+players = tibble(
+  player = c("Erling Hoaland", "Kevin De Bruyne"),
+  goals = c(36, 7),
+  assists = c(8, 16),
+  games = c(35, 32)
+)
+
+players1 <- players %>% mutate(title = c("player_of_match", "none"), wins = c(T, F))
+
+players1 
+```
+
+- `pivot_longer()`
+
+```{r}
+players %>% pivot_longer(c(goals, assists, games))
+
+players_long <- pivot_longer(players, goals:games, names_to = "Statistic", values_to = "Score")
+
+players %>% pivot_longer(-player)
+```
+
+```{r}
+players1 %>% pivot_longer(-c(player, title))
+```
+
+- `pivot_wider()`
+
+```{r}
+players_long <- pivot_longer(players, goals:games, names_to = "Statistic", values_to = "Score")
+
+players_long %>% pivot_wider(names_from = Statistic, values_from = Score)
+
+pivot_longer(players, goals:games) %>% pivot_wider()
+```
+
+
+Exercise:
+
+```{r}
+table1
+```
+
+```{r}
+table2
+```
+
+
+> What type of dataset is Table1 compared to table2
+
+Table1 is the wider dataset and Table2 is the longer dataset
+
+
+
+```{r}
+# table1 -> table2
+
+table1 %>% pivot_longer(c(cases, population), names_to = "type", values_to = "count")
+
+table1 %>% pivot_longer(-c(country, year), names_to = "type", values_to = "count")
+
+# this would work as well but the output is not table2
+
+table1 %>% pivot_longer(c(year, cases, population), names_to = "type", values_to = "count")
+```
+
+```{r}
+# table2 -> table1
+
+table2 %>% pivot_wider(names_from = type, values_from = count)
+```
+
+
+```{r}
+mendota <- read_csv("../../data/lake-mendota-winters-2024.csv")
+```
+
+```{r}
+ggplot(mendota, aes(duration)) +
+  geom_histogram(
+    color = "skyblue",
+    fill = "blue"
+  ) +
+  geom_text(
+    x = 79,
+    y = 21,
+    label = "this is the tallest bar ->",
+    color = "red"
+  )
+```
+
+
+# End of Midterm 1 portion
+
 
 
 
