@@ -9,6 +9,8 @@ knitr::opts_chunk$set(echo = TRUE, error = TRUE)
 library(tidyverse)
 ```
 
+# Wednesday
+
 ## dataset
 
 ```{r}
@@ -103,6 +105,102 @@ right_join(band_instruments, band_members)
 ```{r}
 anti_join(band_instruments, band_members)
 ```
+
+# Friday
+
+## Pivoting
+
+```{r}
+players = tibble(
+  player = c("Erling Haaland", "Kevin De Bruyne"),
+  goals = c(36, 7),
+  assists = c(8, 16),
+  games = c(35, 32)
+)
+
+players
+```
+
+- `pivot_longer()`
+
+```{r}
+pivot_longer(players, c(goals, assists, games))
+
+players_long <- pivot_longer(players, goals:games, names_to = "Stats", values_to = "Score")
+
+pivot_longer(players, -player)
+```
+
+```{r}
+players1 <- players %>% mutate(title = c("player_of_match", "none"))
+players1
+```
+
+```{r}
+players1 %>%  pivot_longer(goals:title)
+
+players1 %>% mutate(win = c(T, F)) %>% pivot_longer(c(goals:games, win))
+```
+
+- `pivot_wider()`
+
+```{r}
+players_long <- pivot_longer(players, goals:games, names_to = "Stats", values_to = "Score")
+
+players_long %>% pivot_wider(names_from = Stats, values_from = Score)
+
+pivot_longer(players, goals:games) %>% pivot_wider()
+```
+
+Exercise:
+
+```{r}
+table1
+```
+
+```{r}
+table2
+```
+
+```{r}
+# table1 -> table2
+
+table1 %>% pivot_longer(c(cases, population), names_to = "type", values_to = "count")
+
+table1 %>% pivot_longer(-c(country, year), names_to = "type", values_to = "count")
+```
+
+```{r}
+# table2 -> table1
+
+table2 %>% pivot_wider(names_from = type, values_from = count)
+```
+```{r}
+table1 %>% pivot_longer(-country)
+```
+
+```{r}
+mendota <- read_csv("../../data/lake-mendota-winters-2024.csv")
+```
+
+```{r}
+ggplot(mendota, aes(duration)) +
+  geom_histogram(
+    color = "blue",
+    fill = "skyblue"
+  ) +
+  geom_text(
+    x = 79,
+    y = 21,
+    label = "this is the tallest bar ->",
+    color = "red"
+  )
+```
+
+
+# End of the midterm 1
+
+
 
 
 
