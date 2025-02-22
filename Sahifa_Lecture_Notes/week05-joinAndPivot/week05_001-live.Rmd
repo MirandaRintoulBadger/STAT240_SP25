@@ -8,6 +8,8 @@ knitr::opts_chunk$set(echo = TRUE, error = TRUE)
 library(tidyverse)
 ```
 
+# Monday
+
 datasets
 
 ```{r}
@@ -95,6 +97,93 @@ left_join(drinks, discounts, join_by(Cafe))
 right_join(discounts, drinks, join_by(Cafe))
 ```
 
+# Friday
+
+## Pivoting
+
+```{r}
+players = tibble(
+  player = c("Erling Haaland", "Kevin De Bruyne"),
+  goals = c(36, 7),
+  assists = c(8, 16),
+  games = c(35, 32)
+)
+
+players1 = tibble(
+  player = c("Erling Haaland", "Kevin De Bruyne"),
+  goals = c(36, 7),
+  assists = c(8, 16),
+  games = c(35, 32),
+  title = c("player_of_the_match", "none")
+)
+
+players
+```
+
+- `pivot_longer()`
+
+```{r}
+pivot_longer(players, c(goals, assists, games))
+
+pivot_longer(players, c(goals, assists, games), names_to = "Statistic", values_to = "Scores")
+
+players1 %>% pivot_longer(-c(player, title))
+
+players %>% pivot_longer()
+
+players_longer <- players %>% pivot_longer(goals:games, names_to = "Statistic", values_to = "Scores")
+
+players_longer
+```
+
+- `pivot_wider()`
+
+```{r}
+players_longer %>% pivot_wider(names_from = Statistic, values_from = Scores)
+```
+
+Example:
+
+```{r}
+table1
+```
+
+```{r}
+table2
+
+# going from table1 to table2
+
+table1 %>% pivot_longer(cases:population, names_to = "type", values_to = "count")
+```
+
+```{r}
+# going from table2 to table1
+
+table2 %>% pivot_wider(names_from = type, values_from = count)
+```
+
+# a look into geom_text
+
+```{r}
+mendota <- read_csv("../../data/lake-mendota-winters-2024.csv")
+```
+```{r}
+ggplot(mendota, aes(x = duration))+
+  geom_histogram(
+    color = "blue",
+    fill = "skyblue"
+  ) +
+  geom_text(x = 80,
+            y = 21,
+            label = "this is the tallest bar ->")
+
+ggplot(mendota, aes(x = duration, y = year1))+
+  geom_point() +
+  geom_text(x = 80,
+            y = 2000,
+            label = "this is the tallest bar ->",
+            color = "red")
+```
 
 
 
