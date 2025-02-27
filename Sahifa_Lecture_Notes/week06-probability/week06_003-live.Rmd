@@ -1,0 +1,49 @@
+---
+title: "week06_003-live"
+output: html_document
+date: "2025-02-24"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+Inline maths: is where the math equations appear in the sentence, for example, $y = (1+x)^2$.
+
+Display math:
+
+$$mean = \bar{x} = \frac{1}{n}\sum_{i=1}^n x_i $$
+```{r}
+prob1 = tibble(
+  x = 0:4,
+  p = c(0.15, 0.25, 0.05, 0.35, NA)
+)
+
+## long format
+prob1
+```
+
+```{r}
+prob1[5,2] <- 0.2
+
+prob1
+```
+
+Add columns xp and (x-mu)2p
+
+```{r}
+prob1 %>% mutate(xp = x*p, "(x-mu)p" = (x-sum(xp))^2*p) %>% summarize(mu = sum(xp), sigma2 = sum(`(x-mu)p`), sigma = sqrt(sigma2))
+```
+
+```{r}
+plot1 = ggplot(prob1, aes(x = x, y = p)) +
+  geom_segment(aes(xend = x, yend = 0), color = "blue", size=2) +
+  geom_hline(yintercept = 0) +
+  ylab("P(X=x)") +
+  ggtitle("Distribution of X")
+
+plot1
+```
+
+

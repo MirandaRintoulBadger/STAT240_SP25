@@ -1,0 +1,59 @@
+---
+title: "week06_004-live"
+output: html_document
+date: "2025-02-21"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+# Latex in Rmd files
+
+I will put a math equation here, $x = (1+y)^2$. (inline math mode)
+
+$$mean = \bar{x} = \frac{1}{n}\sum_{i=1}^n x_i$$
+
+$$\sqrt{x+1}$$
+
+```{r}
+prob1 = tibble(
+  x = 0:4,
+  p = c(0.15, 0.25, 0.05, 0.35, NA)
+)
+
+## long format
+prob1
+```
+```{r}
+prob1[5,2] <- 0.2
+
+prob1
+```
+- What is the mean of the random variable with the previous distribution? What are the variance and standard deviation of the random variable from problem 1?
+
+
+```{r}
+prob1 %>% mutate(xp = x*p, "(x-mu)2p" = (x-sum(xp))^2*p) %>% 
+  summarize(mu = sum(xp), sigma2 = sum(`(x-mu)2p`), sigma = sqrt(sigma2))
+```
+
+- Draw a graph of the discrete distribution.
+
+```{r}
+ggplot(prob1, aes(x = x, y = p)) +
+  geom_segment(aes(xend = x, yend = 0), color = "blue", size = 3) +
+  geom_hline(yintercept = 0) 
+```
+
+
+
+
+
+
+
+
+
+
+

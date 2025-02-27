@@ -1,0 +1,47 @@
+---
+title: "week06-probability"
+output: html_document
+date: "2025-02-21"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+This is the line where I put my maths equation, $x = 1+y$
+The next thing is going to be display mode math
+
+$$x = \sum_{n=0}^{10} \sqrt{ \frac{(1+y)^2}{n}} $$
+
+```{r}
+prob1 = tibble(
+  x = 0:4,
+  p = c(0.15, 0.25, 0.05, 0.35, NA)
+)
+
+prob1
+```
+
+```{r}
+prob1[5,2] <- 0.2
+prob1
+```
+
+## Expectation and variance
+
+```{r}
+prob1 %>% mutate("x.P(x)" = x*p, "(x-E)2.P(x)" = (x-sum(`x.P(x)`))^2*p) %>% summarize(E = sum(`x.P(x)`), Var = sum(`(x-E)2.P(x)`))
+```
+
+```{r}
+ggplot(prob1, aes(x = x, y = p)) +
+  geom_segment(aes(xend = x, yend = 0), color = "blue", size=2) +
+  geom_hline(yintercept = 0) +
+  ylab("P(X=x)") +
+  ggtitle("Distribution of X")
+```
+
+
+
+
