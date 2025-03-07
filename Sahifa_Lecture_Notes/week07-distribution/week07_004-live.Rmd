@@ -1,0 +1,116 @@
+---
+title: "week07_004-live"
+output: html_document
+date: "2025-03-03"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source("../../scripts/ggprob.R")
+```
+
+```{r}
+choose(200, 40)*((1/6)^40)*((5/6)^160)
+```
+
+
+```{r}
+dbinom(0, 4, 1/2) # prob of getting no head in 4 coin flips
+dbinom(0:4, 4, 1/2) # prob of all possible outcomes of X
+```
+
+```{r}
+pbinom(2, 4, 1/2)
+sum(dbinom(0:2, 4, 1/2))
+```
+
+```{r}
+1 - pbinom(2, 4, 1/2) # prob of getting more than 2 heads
+pbinom(2, 4, 1/2, lower.tail = F)
+
+
+1 - pbinom(1, 4, 1/2) # prob of getting atleast 2 heads
+pbinom(1, 4, 1/2, lower.tail = F)
+```
+
+```{r}
+qbinom(0.5, 4, 1/2)
+qbinom(0.6, 4, 1/2)
+```
+
+```{r}
+qbinom(1-0.3, 4, 1/2)
+qbinom(0.3, 4, 1/2, lower.tail = F)
+```
+
+```{r}
+# generate a data with 100 values of number of heads when you flip a coin 4 times
+
+rbinom(100, 4, 1/2)
+```
+
+```{r}
+gbinom(4,1/2)
+gbinom(4, 0.1)
+gbinom(4, 0.9)
+```
+
+## Normal distribution
+
+$$X \sim N(100, 25)$$
+
+```{r}
+gnorm(100, 25)
+```
+
+
+```{r}
+dnorm(100, 100, 25)
+dnorm(90, 100, 25)
+```
+
+```{r}
+pnorm(100, 100, 25)
+pnorm(100.001, 100, 25)
+```
+
+```{r}
+qnorm(0.6, 100, 25)
+pnorm(106.3337, 100, 25)
+```
+
+```{r}
+qnorm(0.7, 100, 25)
+qnorm(0.3, 100, 25, lower.tail = F)
+```
+
+```{r}
+rnorm(10, 100, 25)
+```
+
+
+```{r}
+x = 101
+pnorm(101, 100, 25)
+pnorm((101-100)/25)
+```
+```{r}
+qnorm(0.975, 100, 25)
+```
+
+
+$$P(25 \leq X < 75)$$
+
+```{r}
+pnorm(75, 100, 25) - pnorm(25, 100, 25)
+
+pnorm(125, 100, 25) - pnorm(75, 100, 25)
+```
+
+```{r}
+2 * pnorm(75, 100, 25)
+```
+
+
+
+

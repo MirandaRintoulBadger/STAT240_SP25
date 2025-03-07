@@ -1,0 +1,63 @@
+---
+title: "week07_003-distribution"
+output: html_document
+date: "2025-03-03"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+source("../../scripts/ggprob.R")
+```
+
+
+```{r}
+choose(200, 40)*((1/6)^40 )*((5/6)^160)
+```
+
+```{r}
+# X is the number of heads in 4 coin flips
+
+dbinom(0, 4, 1/2)
+
+dbinom(0:4, 4, 1/2)
+```
+
+```{r}
+# probability of getting atmost 2 heads
+
+pbinom(2, 4, 1/2)
+pbinom(2.5, 4, 1/2)
+sum(dbinom(0:2, 4, 1/2))
+```
+
+```{r}
+1 - pbinom(2, 4, 1/2) # prob of getting more than 2 heads
+pbinom(2, 4, 1/2, lower.tail = F)
+
+
+1 - pbinom(1,4,1/2) # prob of getting atleast 2 heads
+pbinom(1,4,1/2, lower.tail = F)
+
+```
+
+```{r}
+qbinom(0.5, 4, 1/2)
+qbinom(0.6, 4, 1/2)
+```
+
+```{r}
+qbinom(1-0.6, 4, 1/2)
+qbinom(0.6, 4, 1/2, lower.tail = F)
+```
+
+```{r}
+# randomly repeat the 4 coin flips, 100 times
+
+rbinom(100, 4, 1/2)
+
+```
+```{r}
+gbinom(4, 1/2)
+gbinom(4, 0.2)
+gb
