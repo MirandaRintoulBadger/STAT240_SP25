@@ -43,12 +43,12 @@ Each row corresponds to a single $\text{Binom}(n, p)$ distribution. The first tw
 
 Create line plots of the following:
 - $\sigma$ versus $p$
-- 90th percentile versus $n$
+- 90th percentile versus $p$
 
 
 How does the standard deviation change with $p$?
 
-Comment on the relationship between the 90th percentile and $n$.
+Comment on the relationship between the 90th percentile and $p$.
 
 
 
