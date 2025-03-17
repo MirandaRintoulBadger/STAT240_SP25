@@ -50,7 +50,7 @@ Assuming that the test score of both the classes are normally distributed. Jared
 
 > Write your answer here!!
 
-**Part b** Find Jasper's test scores such that they both have the same percentile.
+**Part c** Find Jasper's test scores such that they both have the same percentile.
 
 ```{r}
 # Write your code here!
