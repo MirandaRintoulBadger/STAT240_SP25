@@ -1,0 +1,160 @@
+---
+title: "week08-live"
+output: html_document
+date: "2025-03-14"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+p = 0.55
+set.seed(10192024)
+```
+
+
+```{r}
+population = c(rep("A", 100*p), rep("B", 100*(1-p)))
+```
+
+
+```{r}
+sample(population, 20)
+mean(sample(population, 20)=="A")
+mean(sample(population, 20)=="A")
+mean(sample(population, 20)=="A")
+mean(sample(population, 20)=="A")
+```
+```{r}
+sample(population, 40)
+mean(sample(population, 40)=="A")
+mean(sample(population, 40)=="A")
+mean(sample(population, 40)=="A")
+mean(sample(population, 40)=="A")
+```
+
+
+
+```{r}
+manyRepetitions40 = replicate(100000, mean(sample(population, size = 4) == "A"))
+
+tibble(p_hat = manyRepetitions40) %>% 
+  ggplot(aes(p_hat)) +
+  geom_histogram(binwidth = 1/4, center = 0.50, color = "black", fill = "gray") +
+  geom_hline(yintercept = 0) +
+  scale_x_continuous(breaks = seq(0, 1, by = 0.1), limits = c(0, 1)) +
+  labs(
+    title = "Simulated Sampling Distribution of p-hat",
+    subtitle = "From n = 40 people"
+  )
+```
+
+```{r}
+manyRepetitions40 = replicate(100000, mean(sample(population, size = 20) == "A"))
+
+tibble(p_hat = manyRepetitions40) %>% 
+  ggplot(aes(p_hat)) +
+  geom_histogram(binwidth = 1/20, center = 0.50, color = "black", fill = "gray") +
+  geom_hline(yintercept = 0) +
+  scale_x_continuous(breaks = seq(0, 1, by = 0.1), limits = c(0, 1)) +
+  labs(
+    title = "Simulated Sampling Distribution of p-hat",
+    subtitle = "From n = 20 people"
+  )
+```
+
+
+```{r}
+manyRepetitions40 = replicate(100000, mean(sample(population, size = 40) == "A"))
+
+tibble(p_hat = manyRepetitions40) %>% 
+  ggplot(aes(p_hat)) +
+  geom_histogram(binwidth = 1/40, center = 0.50, color = "black", fill = "gray") +
+  geom_hline(yintercept = 0) +
+  scale_x_continuous(breaks = seq(0, 1, by = 0.1), limits = c(0, 1)) +
+  labs(
+    title = "Simulated Sampling Distribution of p-hat",
+    subtitle = "From n = 40 people"
+  )
+```
+
+```{r}
+# p-value for Muriel tea tasting test
+
+# p-value is the prob that she gets 6 or more cups right in 8 trials
+
+pbinom(5, 8, 0.5, lower.tail = F)
+
+# alpha = 0.05
+# p-value is more than alpha, so we fail to reject H_0, that is, H_0 is true.
+```
+
+
+In the actual experiment she got all the cups right, then
+
+```{r}
+pbinom(7, 8, 0.5, lower.tail = F)
+
+# p-value is way smaller than alpha, so we reject H_0, that is, H_alpha is true.
+```
+
+
+```{r}
+# p value is the prob of getting more than 5 cups right
+
+pbinom(5, 8, 0.5, lower.tail = F)
+
+# alpha = 0.05 
+# since p-val is more than alpha we fail to reject H_0
+```
+
+```{r}
+# she got all 8 cups right
+
+pbinom(7, 8, 0.5, lower.tail = F)
+
+# alpha = 0.05
+# p-val is less than alpha, so we reject H_0.
+```
+
+
+```{r}
+# p-val is probability that she gets 6 or more cups right
+
+p_val = pbinom(5, 8, 0.5, lower.tail = F)
+p_val
+
+# alpha = 0.05
+# Since p_val is more than alpha, we fail to reject H_0. 
+```
+
+```{r}
+# p-val is probability that she gets 8 or more cups right
+
+p_val = pbinom(7, 8, 0.5, lower.tail = F)
+p_val
+
+pnorm(1, 0.5, sqrt(0.5*0.5/8), lower.tail = F)
+
+# alpha = 0.05
+# Since p_val is less than alpha, we reject H_0. 
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
