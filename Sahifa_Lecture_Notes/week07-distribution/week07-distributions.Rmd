@@ -412,12 +412,16 @@ $$
 
 * Those formulas will *always work*, but they are often inconvenient to compute. Last week's examples were very small and friendly.
 
-* Now that we know $P(X = x) = \binom{n}{k} * p^k * (1-p)^{n-k}$ for any $X \sim Binom(n, p)$, we can plug this into our mean and variance formulas. 
+* Now that we know $P(X = x) = \binom{n}{x} * p^x * (1-p)^{n-x}$ for any $X \sim Binom(n, p)$, we can plug this into our mean and variance formulas. 
 
-* For example, to derive the mean of $Binom(n, p)$, we can compute:
+* For example, to derive the mean or variance of $Binom(n, p)$, we can compute:
 
 $$
-E(X) = \sum_{k = 0}^n x * \binom{n}{k} * p^k * (1-p)^{n-k}
+E(X) = \sum_{k = 0}^n x * \binom{n}{x} * p^x * (1-p)^{n-x}
+$$
+
+$$
+Var(X) = \sum_{k = 0}^n (x-E(x))^2 * \binom{n}{x} * p^x * (1-p)^{n-x}
 $$
 
 * No easy task, to be sure. Luckily for us, statisticians have already done this for us, and it simplifies to a very nice, intuitive result.
@@ -799,15 +803,15 @@ qbinom(0.35, size = 10, prob = 0.5)
 
 * For any `<dist>`, including `binom`, these three commands have the following input and output types:
 
-+---------------+---------------------+-----------------------------------+
-| Command       | In                  | Out                               |
-+===============+=====================+===================================+
-| ```d<dist>``` | A value of $X$, `x` | $P(X = x)$                        |
-+---------------+---------------------+-----------------------------------+
-| ```p<dist>``` | A value of $X$, `q` | $P(X <= q)$                       |
-+---------------+---------------------+-----------------------------------+
-| ```q<dist>``` | A probability, `p`  | $q$, such that $P(X <= q) = p$    |
-+---------------+---------------------+-----------------------------------+
++---------------+---------------------+----------------------------------------+
+| Command       | Input               | Out                                    |
++===============+=====================+========================================+
+| ```d<dist>``` | A value of $X$, `x` | $P(X = x)$                             |
++---------------+---------------------+----------------------------------------+
+| ```p<dist>``` | A value of $X$, `q` | $P(X \leq q)$                           |
++---------------+---------------------+----------------------------------------+
+| ```q<dist>``` | A probability, `p`  | $q$, such that $P(X \leq q) = p$     
++---------------+---------------------+----------------------------------------+
 
 ---
 
@@ -975,13 +979,17 @@ $$
 
 ### Mean and Variance
 
-* Similar to how we substituted $P(X=x)$ into the discrete mean formula to find the mean of a binomial distribution, let's subtitute $f(x)$ into the continuous mean formula to find the mean of the normal distribution.
+* Similar to how we substituted $P(X=x)$ into the discrete mean formula to find the mean of a binomial distribution, let's subtitute $f(x)$ into the continuous mean formula to find the expression mean and variance of the normal distribution.
 
 $$
-E(X) = \int x * \frac{1}{\sigma\sqrt{2\pi}} e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2}
+E(X) = \int x * \frac{1}{\sigma\sqrt{2\pi}} e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2}dx
 $$
 
-* That's a doozy. If you're curious, [here's the algebra behind working this out.](https://statproofbook.github.io/P/norm-mean.html#)
+$$
+Var(X) = \int (x-\mu)^2 * \frac{1}{\sigma\sqrt{2\pi}} e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2}dx
+$$
+
+* That's a doozy. If you're curious, [here's the algebra behind working the E(X) out.](https://statproofbook.github.io/P/norm-mean.html#)
 
 * If you're not curious, just trust us that the final result is:
 
@@ -1279,7 +1287,7 @@ pnorm(75, mu, sigma)
 
 * This "universal language" leads us to **standardized scores, or $Z$ scores**.
 
-> When a random variable $X$ takes on a random value $x$, its **standardized score or $Z$-score** is $z = \frac{x - \mu}{\sigma}. This tells us how extreme the point is regardless of context. 
+> When a random variable $X$ takes on a random value $x$, its **standardized score or $Z$-score** is $z = \frac{x - \mu}{\sigma}$. This tells us how extreme the point is regardless of context. 
 
 ---
 
@@ -1335,6 +1343,62 @@ gnorm() +
 
 
 # Extensions of Normal Distributions
+
+## Normal Approximation of Binomial Distributions
+
+* This section is conceptually separate from Central Limit Theorem and only relies on your knowledge of normal and binomial distributions. It will pop up later in statistical inference.
+
+> A useful mathematical property of the binomial distribution is that its probability distribution approximately converges to (meaning, "looks like") a normal distribution if $n$ is not small and $p$ is not extremely close to 0 or 1.
+
+* We could see this visually in the "Explore Binomial Graphs" section; as $n$ got larger for reasonable $p$ values, the binomial distribution looked more and more like a bell curve.
+
+* Mathematically:
+
+> If $X \sim Binom(n, p)$, then $X \stackrel{\text{approx}}{\sim}\text{N}(np, \sqrt{np(1-p)})$.
+
+* It is important to remember the **binomial distribution is discrete**, and the **normal distribution is continuous**. However, aside from this key difference, their probability distributions are mathematically linked.
+
+- If $n$ is large enough, and $p$ is not too close to 0 or 1, the binomial distribution can be **approximated** by the normal distribution. 
+- A rule of thumb for "large enough" is if $np(1-p) \geq 10$.
+    
+- Here is an example where the assumption is satisfied.
+    - $n = 100$
+    - $p = 0.5$
+    - $np(1-p) = 25$
+    
+```{r normal-approx-good}
+## Assumptions satisfied
+n = 100
+p = 0.5
+mu = n*p
+sigma = sqrt(n*p*(1-p))
+
+gbinom(n, p, scale=TRUE) +
+  geom_norm_density(mu, sigma, color = "red") +
+  theme_minimal()
+```
+
+---
+
+- Here is an example where the assumption is **not satisfied**.
+    - $n = 100$
+    - $p = 0.01$
+    - $np(1-p) = 0.99$
+    
+```{r normal-approx-bad}
+## Criteria not satisfied
+n = 100
+p = 0.01
+mu = n*p
+sigma = sqrt(n*p*(1-p))
+
+gbinom(n, p, scale=TRUE) +
+  geom_norm_density(mu, sigma, color = "red") +
+  theme_minimal()
+```
+
+
+---
 
 ## Central Limit Theorem
 
@@ -1578,58 +1642,5 @@ pnorm(0.1, xbar_mean, xbar_sd)
 
 > **Philosophical Takeaway**: Since CLT dictates $\bar{X}$ always has a normal distribution, you can use `pnorm` to calculate probabilities of the sample mean taking on certain values!
 
----
 
-## Normal Approximation of Binomial Distributions
-
-* This section is conceptually separate from Central Limit Theorem and only relies on your knowledge of normal and binomial distributions. It will pop up later in statistical inference.
-
-> A useful mathematical property of the binomial distribution is that its probability distribution approximately converges to (meaning, "looks like") a normal distribution if $n$ is not small and $p$ is not extremely close to 0 or 1.
-
-* We could see this visually in the "Explore Binomial Graphs" section; as $n$ got larger for reasonable $p$ values, the binomial distribution looked more and more like a bell curve.
-
-* Mathematically:
-
-> If $X \sim Binom(n, p)$, then $X \stackrel{\text{approx}}{\sim}\text{N}(np, \sqrt{np(1-p)})$.
-
-* It is important to remember the **binomial distribution is discrete**, and the **normal distribution is continuous**. However, aside from this key difference, their probability distributions are mathematically linked.
-
-- If $n$ is large enough, and $p$ is not too close to 0 or 1, the binomial distribution can be **approximated** by the normal distribution. 
-- A rule of thumb for "large enough" is if $np(1-p) \geq 10$.
-    
-- Here is an example where the assumption is satisfied.
-    - $n = 100$
-    - $p = 0.5$
-    - $np(1-p) = 25$
-    
-```{r normal-approx-good}
-## Assumptions satisfied
-n = 100
-p = 0.5
-mu = n*p
-sigma = sqrt(n*p*(1-p))
-
-gbinom(n, p, scale=TRUE) +
-  geom_norm_density(mu, sigma, color = "red") +
-  theme_minimal()
-```
-
----
-
-- Here is an example where the assumption is **not satisfied**.
-    - $n = 100$
-    - $p = 0.01$
-    - $np(1-p) = 0.99$
-    
-```{r normal-approx-bad}
-## Criteria not satisfied
-n = 100
-p = 0.01
-mu = n*p
-sigma = sqrt(n*p*(1-p))
-
-gbinom(n, p, scale=TRUE) +
-  geom_norm_density(mu, sigma, color = "red") +
-  theme_minimal()
-```
 
