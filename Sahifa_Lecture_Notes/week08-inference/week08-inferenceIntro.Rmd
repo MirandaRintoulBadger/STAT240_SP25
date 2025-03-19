@@ -34,6 +34,49 @@ source("../../scripts/ggprob.R")
 
 * Let's dissect this definition -  and the technical words it contains - a little more closely.
 
+## Sample vs. Population
+
+> The **sample** is the smaller group for which we have data. Properties of the sample, like its mean, median, minimum, maximum, standard deviation, are called **statistics**. 
+
+> The **population** is the larger group from which the sample was drawn. It is the group that we wish to learn about, but can't study every unit of, often because it is too big or we are otherwise unable to study some units. Properties of the population are called **parameters**. 
+
+* Parameters are **the entire point** of statistical inference - estimating them and drawing conclusions about them.
+
+* We use statistical inference when we **cannot obtain the true value of the parameter** for some reason (for example, population too large or inaccessible), and need to instead estimate it or draw conclusions about it based on a smaller, more accessible sample.
+
+---
+
+For example, let's consider trying to predict the winner of the election between Candidate A and Candidate B.
+
+* The **population** is everyone who plans to vote, and let's say the **parameter of interest** is the percentage of them who would vote for Candidate A.
+
+* You could get a (pretty much) perfect answer simply by asking everyone ahead of time who they are going to vote for.
+
+* However, political/news organizations are not able to do that, **because the population is too large** - hundreds of millions of people in the United States.
+
+* What they do instead is to collect data from a **smaller sample**, perhaps a thousand people.
+
+* If 51% of that random sample claims they plan to vote for Candidate A, they then claim that 51% of the population plans to vote for Candidate A, with some known level of uncertainty.
+
+* If we can do that in a valid and meaningful way, then that is a huge achievement - making a statement about hundreds of millions of people by only collecting data from a thousand, which is 0.001% of the population.
+
+### Representativeness
+
+* That logical leap has an underlying **assumption**.
+
+* Claiming that 51% of your random sample plans to vote for Candidate A is a fact - but jumping from there to the conclusion that 51% of the population does too requires your **sample to be representative of your population**.
+
+> If the sample is **representative** of the population, then we can use sample statistics to estimate/draw conclusions about population parameters.
+
+* Representativeness is not something we can check numerically. In fact, if we could check that our statistics (from the sample) match up with the parameters (from the population), that would mean we know the parameter and there'd be no point to the sample anyway.
+
+* Therefore, we can only try to reason whether our sample might be, in some systematic way, different from the population.
+
+> The highest standard of a sample being **representative** is to take it **completely randomly** from the larger population.
+
+> Furthermore, the **larger** your random sample is, the better it **represents** the population.
+
+---
 
 #### (Un)Biased Samples
 
@@ -311,7 +354,7 @@ gnorm(true_p, stdError) +
 qnorm(0.975, true_p, stdError)
 ```
 
-* The general adjustment here is that if your confidence level is $\alpha$, then the right endpoint is the $\alpha + \frac{1-\alpha}{2}$ quantile of the sampling distribution. (Start at $\alpha$, and then go halfway towards 1.)
+* The general adjustment here is that if your confidence level is $c= 1-\alpha$, then the right endpoint is the $c + \frac{1-c}{2}$ quantile of the sampling distribution. (Start at $c$, and then go halfway towards 1.)
 
 ```{r}
 conf.level = 0.95
@@ -345,7 +388,7 @@ gnorm(true_p, stdError) +
 
 * Finally, putting it all together, going out this far in each direction from whatever random $\hat{p}$ we get will, by definition, contain the true $p$ 95% of the time! (or whatever your desired confidence was)
 
-* This distance, `qnorm(C + (1-C)/2) * SE`, is called the **margin of error**.
+* This distance, `qnorm(c + (1-c)/2) * SE`, is called the **margin of error**.
 
 * Note that we use `qnorm` because the sampling distribution is Normal. In future examples, the sampling distribution may be different, and we would use a different function, like `qt` to calculate a quantile from the $t$ distribution.
 
@@ -354,12 +397,12 @@ gnorm(true_p, stdError) +
 * More generally, confidence intervals take the following form:
 
 $$
-\text{Point Estimate } \pm \text{ Quantile Confidence Score * Standard Error of PE}
+\text{Point Estimate } \pm \text{ Critical Value * Standard Error of PE}
 $$
 
 * Where the **point estimate** is your estimate of the true parameter based on your data... (such as the sample proportion $\hat{p}$ for the true $p$, or the sample mean $\bar{x}$ for the true $\mu$)
 
-* ... the **quantile confidence score** is the ($\alpha$ + (1-$\alpha$)/2) quantile of the sampling distribution...
+* ... the **Critical value** also known as **quantile confidence score** is the ($c$ + (1-$c$)/2) quantile of the sampling distribution...
 
 * and the **standard error of the point estimate** is a known formula based on what point estimate you are using.
 
@@ -546,11 +589,13 @@ Then, the number of correct cups out of 8, call this $X$, follows the $Binom(8, 
 
 * The concept of a **null** and **alternative hypothesis** rise out of these statements.
 
-> The **null** hypothesis is usually of the form $\text{parameter} = \text{Some Important Value}$. It is the thing we wish to **attack** or **disprove**.
+> The **null** hypothesis is usually of the form $\text{parameter} = \text{Value}$. It is the thing we wish to **attack** or **disprove**. These null hypothesis with an equality are what we call **simple null hypothesis**. We also have **composite null hypothesis** where the usual form of the null hypothesis is as $\text{parameter} \text{or} \geq \text{or} \leq \text{Value}$
 
-> The **alternative** hypothesis is of the form $\text{parameter} \neq \text{or} > \text{or} < \text{Same Important Value As Null}$. It is the thing we wish to **show is likely true**.
+> The **alternative** hypothesis is of the form $\text{parameter} \neq \text{or} > \text{or} < \text{Same Value As Null}$. It is the thing we wish to **show is likely true**. 
 
-* Even though bolstering the alternative hypothesis is our main goal, we will do this by attacking the null hypothesis.
+* Simple or composite null hypothesis, every hypothesis testing focuses on the alternative hypothesis, so the method of inference doesn't change because of the type of null hypothesis.
+
+* Even though bolstering the alternative hypothesis is our main goal, we will do this by attacking the null hypothesis. 
 
 ## The Big Idea: Contradiction
 

@@ -1276,8 +1276,10 @@ margin-left: 0 !important;
       <li><a href="#learning-outcomes" id="toc-learning-outcomes">Learning Outcomes</a></li>
       <li><a href="#preliminaries" id="toc-preliminaries">Preliminaries</a></li>
       </ul></li>
-      <li><a href="#motivation-discussion" id="toc-motivation-discussion">Motivation &amp;
-      Discussion</a></li>
+      <li><a href="#motivation-discussion" id="toc-motivation-discussion">Motivation &amp; Discussion</a>
+      <ul>
+      <li><a href="#sample-vs.-population" id="toc-sample-vs.-population">Sample vs. Population</a></li>
+      </ul></li>
       <li><a href="#sampling-error-and-sampling-distributions" id="toc-sampling-error-and-sampling-distributions">Sampling Error
       and Sampling Distributions</a>
       <ul>
@@ -1361,6 +1363,84 @@ upon a <strong>sample</strong> of data from that population.</p>
 <li>Let’s dissect this definition - and the technical words it contains
 - a little more closely.</li>
 </ul>
+<div id="sample-vs.-population" class="section level2">
+<h2>Sample vs. Population</h2>
+<blockquote>
+<p>The <strong>sample</strong> is the smaller group for which we have
+data. Properties of the sample, like its mean, median, minimum, maximum,
+standard deviation, are called <strong>statistics</strong>.</p>
+</blockquote>
+<blockquote>
+<p>The <strong>population</strong> is the larger group from which the
+sample was drawn. It is the group that we wish to learn about, but can’t
+study every unit of, often because it is too big or we are otherwise
+unable to study some units. Properties of the population are called
+<strong>parameters</strong>.</p>
+</blockquote>
+<ul>
+<li><p>Parameters are <strong>the entire point</strong> of statistical
+inference - estimating them and drawing conclusions about them.</p></li>
+<li><p>We use statistical inference when we <strong>cannot obtain the
+true value of the parameter</strong> for some reason (for example,
+population too large or inaccessible), and need to instead estimate it
+or draw conclusions about it based on a smaller, more accessible
+sample.</p></li>
+</ul>
+<hr />
+<p>For example, let’s consider trying to predict the winner of the
+election between Candidate A and Candidate B.</p>
+<ul>
+<li><p>The <strong>population</strong> is everyone who plans to vote,
+and let’s say the <strong>parameter of interest</strong> is the
+percentage of them who would vote for Candidate A.</p></li>
+<li><p>You could get a (pretty much) perfect answer simply by asking
+everyone ahead of time who they are going to vote for.</p></li>
+<li><p>However, political/news organizations are not able to do that,
+<strong>because the population is too large</strong> - hundreds of
+millions of people in the United States.</p></li>
+<li><p>What they do instead is to collect data from a <strong>smaller
+sample</strong>, perhaps a thousand people.</p></li>
+<li><p>If 51% of that random sample claims they plan to vote for
+Candidate A, they then claim that 51% of the population plans to vote
+for Candidate A, with some known level of uncertainty.</p></li>
+<li><p>If we can do that in a valid and meaningful way, then that is a
+huge achievement - making a statement about hundreds of millions of
+people by only collecting data from a thousand, which is 0.001% of the
+population.</p></li>
+</ul>
+<div id="representativeness" class="section level3">
+<h3>Representativeness</h3>
+<ul>
+<li><p>That logical leap has an underlying
+<strong>assumption</strong>.</p></li>
+<li><p>Claiming that 51% of your random sample plans to vote for
+Candidate A is a fact - but jumping from there to the conclusion that
+51% of the population does too requires your <strong>sample to be
+representative of your population</strong>.</p></li>
+</ul>
+<blockquote>
+<p>If the sample is <strong>representative</strong> of the population,
+then we can use sample statistics to estimate/draw conclusions about
+population parameters.</p>
+</blockquote>
+<ul>
+<li><p>Representativeness is not something we can check numerically. In
+fact, if we could check that our statistics (from the sample) match up
+with the parameters (from the population), that would mean we know the
+parameter and there’d be no point to the sample anyway.</p></li>
+<li><p>Therefore, we can only try to reason whether our sample might be,
+in some systematic way, different from the population.</p></li>
+</ul>
+<blockquote>
+<p>The highest standard of a sample being
+<strong>representative</strong> is to take it <strong>completely
+randomly</strong> from the larger population.</p>
+</blockquote>
+<blockquote>
+<p>Furthermore, the <strong>larger</strong> your random sample is, the
+better it <strong>represents</strong> the population.</p>
+</blockquote>
+<hr />
 <div id="unbiased-samples" class="section level4">
 <h4>(Un)Biased Samples</h4>
 <ul>
@@ -1470,6 +1550,8 @@ because the sample is random).</p></li>
 <li><p>However, asking 20 people instead of 4 has given our <span class="math inline">\(\hat{p}\)</span> more <strong>stability</strong>;
 we have reduced the <strong>sampling error</strong>.</p></li>
 </ul>
+</div>
+</div>
 </div>
 </div>
 <div id="sampling-error-and-sampling-distributions" class="section level1">
@@ -1670,10 +1752,9 @@ of this normal distribution!</li>
 <pre><code>## [1] 0.5409836</code></pre>
 <ul>
 <li>The general adjustment here is that if your confidence level is
-<span class="math inline">\(\alpha\)</span>, then the right endpoint is
-the <span class="math inline">\(\alpha + \frac{1-\alpha}{2}\)</span>
-quantile of the sampling distribution. (Start at <span class="math inline">\(\alpha\)</span>, and then go halfway towards
-1.)</li>
+<span class="math inline">\(c= 1-\alpha\)</span>, then the right
+endpoint is the <span class="math inline">\(c + \frac{1-c}{2}\)</span>
+quantile of the sampling distribution. (Start at <span class="math inline">\(c\)</span>, and then go halfway towards 1.)</li>
 </ul>
 <div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a>conf.level <span class="ot">=</span> <span class="fl">0.95</span></span>
 <span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a><span class="fu">qnorm</span>(conf.level <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> conf.level) <span class="sc">/</span> <span class="dv">2</span>, true_p, stdError)</span></code></pre></div>
@@ -1697,7 +1778,7 @@ direction</strong> as
 direction from whatever random <span class="math inline">\(\hat{p}\)</span> we get will, by definition,
 contain the true <span class="math inline">\(p\)</span> 95% of the time!
 (or whatever your desired confidence was)</p></li>
-<li><p>This distance, <code>qnorm(C + (1-C)/2) * SE</code>, is called
+<li><p>This distance, <code>qnorm(c + (1-c)/2) * SE</code>, is called
 the <strong>margin of error</strong>.</p></li>
 <li><p>Note that we use <code>qnorm</code> because the sampling
 distribution is Normal. In future examples, the sampling distribution
@@ -1711,13 +1792,13 @@ may be different, and we would use a different function, like
 <li>More generally, confidence intervals take the following form:</li>
 </ul>
 <p><span class="math display">\[
-\text{Point Estimate } \pm \text{ Quantile Confidence Score * Standard
-Error of PE}
+\text{Point Estimate } \pm \text{ Critical Value * Standard Error of PE}
 \]</span></p>
 <ul>
 <li><p>Where the <strong>point estimate</strong> is your estimate of the
 true parameter based on your data… (such as the sample proportion <span class="math inline">\(\hat{p}\)</span> for the true <span class="math inline">\(p\)</span>, or the sample mean <span class="math inline">\(\bar{x}\)</span> for the true <span class="math inline">\(\mu\)</span>)</p></li>
-<li><p>… the <strong>quantile confidence score</strong> is the (<span class="math inline">\(\alpha\)</span> + (1-<span class="math inline">\(\alpha\)</span>)/2) quantile of the sampling
+<li><p>… the <strong>Critical value</strong> also known as
+<strong>quantile confidence score</strong> is the (<span class="math inline">\(c\)</span> + (1-<span class="math inline">\(c\)</span>)/2) quantile of the sampling
 distribution…</p></li>
 <li><p>and the <strong>standard error of the point estimate</strong> is
 a known formula based on what point estimate you are using.</p></li>
@@ -1885,18 +1966,25 @@ accurately than random guessing</strong>.</p></li>
 hypothesis</strong> rise out of these statements.</li>
 </ul>
 <blockquote>
-<p>The <strong>null</strong> hypothesis is usually of the form <span class="math inline">\(\text{parameter} = \text{Some Important
-Value}\)</span>. It is the thing we wish to <strong>attack</strong> or
-<strong>disprove</strong>.</p>
+<p>The <strong>null</strong> hypothesis is usually of the form <span class="math inline">\(\text{parameter} = \text{Value}\)</span>. It is
+the thing we wish to <strong>attack</strong> or
+<strong>disprove</strong>. These null hypothesis with an equality are
+what we call <strong>simple null hypothesis</strong>. We also have
+<strong>composite null hypothesis</strong> where the usual form of the
+null hypothesis is as <span class="math inline">\(\text{parameter}
+\text{or} \geq \text{or} \leq \text{Value}\)</span></p>
 </blockquote>
 <blockquote>
 <p>The <strong>alternative</strong> hypothesis is of the form <span class="math inline">\(\text{parameter} \neq \text{or} &gt; \text{or}
-&lt; \text{Same Important Value As Null}\)</span>. It is the thing we
-wish to <strong>show is likely true</strong>.</p>
+&lt; \text{Same Value As Null}\)</span>. It is the thing we wish to
+<strong>show is likely true</strong>.</p>
 </blockquote>
 <ul>
-<li>Even though bolstering the alternative hypothesis is our main goal,
-we will do this by attacking the null hypothesis.</li>
+<li><p>Simple or composite null hypothesis, every hypothesis testing
+focuses on the alternative hypothesis, so the method of inference
+doesn’t change because of the type of null hypothesis.</p></li>
+<li><p>Even though bolstering the alternative hypothesis is our main
+goal, we will do this by attacking the null hypothesis.</p></li>
 </ul>
 </div>
 <div id="the-big-idea-contradiction" class="section level2">
