@@ -51,6 +51,16 @@ lake_mod <- lm(duration ~ year1, data = monona)
 
 ## Hypothesis test for slope
 
+Let's test whether the Lake Monona slope is negative.  $H_0: \beta_1 \ge 0$ versus $H_A: \beta_1 < 0$.  We get an observed test statistic of -8.63, which is very extreme.
+
+```{r}
+n <- nrow(monona)
+
+# By default, pt finds a lower probability
+pt(-8.36, df = n-2)
+```
+
+
 The direction of a p-value calculation is according to the alternative hypothesis.
 
 ```{r, echo = FALSE}
@@ -75,14 +85,7 @@ gnorm() +
   ggtitle("Two-sided p value")
 ```
 
-Let's test whether the Lake Monona slope is negative.  $H_0: \beta_1 \ge 0$ versus $H_A: \beta_1 < 0$.  We get an observed test statistic of -8.63, which is very extreme.
 
-```{r}
-n <- nrow(monona)
-
-# By default, pt finds a lower probability
-pt(-8.36, df = n-2)
-```
 
 What if it was two-sided?  We would have the same test statistic and null distribution, but a different p-value.  This matches the `summary` output.
 
