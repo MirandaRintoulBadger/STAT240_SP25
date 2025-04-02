@@ -1,0 +1,52 @@
+---
+title: "week11_003-live"
+output: html_document
+date: "2025-03-31"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+monona <- read_csv("../../data/lake-monona-winters-2024.csv")
+```
+
+```{r}
+model = lm(duration~year1, monona)
+summary(model)
+```
+
+```{r}
+# 95% Confidence interval for the slope
+
+pe = -0.22298 
+cv = qt(0.975, 169-2)
+cv
+se = 0.02667 
+
+pe + c(-1, 1)*cv*se # ci of beta_hat
+```
+
+```{r}
+t = pe/se
+t
+p_val = pt(t, 169-2)
+p_val
+
+p_val = pt(t, 169-2, lower.tail = F)
+p_val
+```
+
+```{r}
+predict(lm(duration~year1, monona), newdata = tibble(year1 = 2024:2030), interval = "prediction")
+```
+
+```{r}
+predict(lm(duration~year1, monona), newdata = tibble(year1 = 2024:2030), interval = "confidence")
+```
+
+
+
+
+
+
+

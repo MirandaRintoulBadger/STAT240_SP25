@@ -1,0 +1,70 @@
+---
+title: "week11_001-live"
+output: html_document
+date: "2025-03-31"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+
+```{r}
+monona <- read_csv("../../data/lake-monona-winters-2024.csv")
+model = lm(duration~year1, monona)
+summary(model)
+```
+
+
+```{r}
+# 95% CI for beta_1 in the monona dataset
+
+beta_1_hat = -0.22298
+cv = qt(0.975, 167)
+se = 0.02667
+
+beta_1_hat + c(-1, 1)*cv*se
+```
+
+
+```{r}
+t = beta_1_hat/se # test statistic
+t
+
+t1 = (beta_1_hat-1)/se
+t1
+```
+
+
+```{r}
+# p value for the left (lower) tail because the test statistic is negative
+
+p_val = pt(t, 167) 
+p_val
+
+p_val_2_sided = 2*p_val
+```
+
+
+```{r}
+t1 = (beta_1_hat-1)/se
+t1
+pt(t1, 167, lower.tail = F)
+pt(t1, 167)
+```
+
+
+```{r}
+predict(lm(duration~year1, monona), newdata = tibble(year1 = 2024:2030), interval = "prediction")
+```
+
+```{r}
+predict(lm(duration~year1, monona), newdata = tibble(year1 = 2024:2030), interval = "confidence")
+```
+
+
+
+
+
+
