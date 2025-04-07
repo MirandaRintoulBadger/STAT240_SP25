@@ -692,7 +692,7 @@ $$
 
 * When we assume $p = 0.5$, this turns into $X \sim Binom(90, 0.5)$. That is our **null distribution**, which is fully known.
 
-## Step 4: Identify Relevant Outcomes from Data + Alt. Hyp.
+## Step 4: Identify p-value from Data.
 
 * We now bring in our observed data; in this case $X = 60$.
 
@@ -713,7 +713,6 @@ gbinom(90, null_p, scale = TRUE) +
 
 * Recall that the alternative hypothesis was $p > 0.5$. The lower outcomes don't constitute evidence for a large $p$, but the higher outcomes do. Therefore, our set of interest is **values greater than or equal to 60**.
 
-## Step 5: Calculate P-Value
 
 * Recall the **p-value** of a hypothesis test is the **probability of observing a value of the test statistic as or more extreme than the one we did**, on the null distribution, with "extreme" defined by the null hypothesis.
 
@@ -732,7 +731,7 @@ gbinom(90, null_p, scale = TRUE) +
 
 * The **p-value** for this test is 0.001.
 
-## Step 6: Interpret In Context
+## Step 5: Compare the p-value with $\alpha$. 
 
 > We find strong evidence that Chimpanzee A is inclined to make the prosocial choice more often than randomly (p-value = 0.001, single proportion test).
 
@@ -791,7 +790,7 @@ $$
 
 ---
 
-**Step 4: Identify Relevant Outcomes**
+**Step 4: Identify p-value**
 
 ```{r}
 gbinom(200, 0.25, scale = TRUE) +
@@ -823,9 +822,6 @@ tibble(
 
 * However, only $X >= 57$ constitutes evidence for the alternative hypothesis, $H_A: p > 0.25$.
 
----
-
-**Step 5: Calculate P-Value**
 
 * We wish to calculate $P(Binom(200, 0.25) >= 57)$.
 
@@ -838,7 +834,7 @@ pbinom(57 - 1, 200, 0.25, lower.tail = FALSE)
 
 ---
 
-**Step 6: Interpret in Context**
+**Step 5: Compare with significance level**
 
 > We fail to find strong evidence that the psychic is not picking randomly. (p = 0.14, single proportion test)
 
@@ -1058,7 +1054,7 @@ $$
 \frac{(\hat{p_1} - \hat{p_2}) - (0)}{\sqrt{ \frac{\bar{p}(1-\bar{p})}{n_1} + \frac{\bar{p}(1-\bar{p})}{n_2}}} \sim N(0, 1)
 $$
 
-### Step 4: Identify Relevant Outcomes from Data + Alt. Hyp
+### Step 4: Identify p-value
 
 * Our observed value of the test statistic is:
 
@@ -1089,8 +1085,6 @@ gnorm() +
 
 * However, only $X \geq 0.65$ constitutes evidence for our alternative hypothesis, $H_A: p_1 > p_2$.
 
-### Step 5: Calculate a P-Value
-
 * The p-value is the probability of getting the outcomes identified in step 4 on the null distribution.
 
 * Here, this is $P(N(0,1) \geq 0.65)$.
@@ -1101,7 +1095,7 @@ gnorm() +
 1 - pnorm(test_stat, mean = 0, sd = 1)
 ```
 
-### Step 6: Interpret in Context
+### Step 5: Compare with significance level
 
 > We fail to find evidence that the true probability of Chimpanzee C making the prosocial choice is different with a partner vs. without (p = 0.25, one-sided test for difference in proportions.)
 
