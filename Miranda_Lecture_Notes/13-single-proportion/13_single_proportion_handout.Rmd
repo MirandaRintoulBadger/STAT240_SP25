@@ -206,5 +206,80 @@ Chimpanzee F has the lowest observed prosocial-partner rate of 47/90.  Is the tr
 ```
 
 
+### Psychic example
 
+A psychic claims to be able to guess a card suit at a better rate than p = 0.25.  They get 57 guesses correct out of 200.  The probability of 57, under the null, is 0.033.  Which outcomes are less likely?
+
+```{r}
+gbinom(200, 0.25, scale = TRUE, col = "black") +
+  geom_vline(xintercept = 57, color = "red", lty = 2) +
+  geom_hline(yintercept = dbinom(57, 200, 0.25), color = "red", lty = 2)
+```
+
+The outcomes 42 and below are less likely (more extreme, more evidence against H0) as 57.
+
+```{r}
+dbinom(57, 200, 0.25)
+
+tibble(
+  x = 38:45,
+  prob = dbinom(x, 200, 0.25),
+  lessThanP57 = prob < dbinom(57, 200, 0.25)
+)
+```
+
+
+For a one-sided p-value, find the probability of X >= 57.
+
+```{r}
+1 - pbinom(57 - 1, 200, 0.25)
+```
+
+```{r}
+# Visualization of one-sided p-value
+gbinom(200, 0.25, scale = TRUE, col = "black") +
+  geom_vline(xintercept = 57, color = "red", lty = 2) +
+  geom_binom_density(200, 0.25, a = 57, col = "dodgerblue",
+                     scale = T)
+```
+
+
+What if our hypotheses were two-sided?  The p-value includes the outcomes greater than or equal to 57 AND those less than or equal to 42.
+
+```{r}
+pbinom(42, 200, 0.25) + (1 - pbinom(57 - 1, 200, 0.25))
+```
+
+```{r}
+# Visualization of two-sided p-value
+gbinom(200, 0.25, scale = TRUE, col = "black") +
+  geom_vline(xintercept = 57, color = "red", lty = 2) +
+  geom_binom_density(200, 0.25, a = 57, col = "dodgerblue",
+                     scale = T) +
+    geom_binom_density(200, 0.25, b = 42, col = "dodgerblue",
+                     scale = T)
+```
+
+
+# Normal approximation
+
+Let's repeat the two-sided test in the psychic example with a Z test.  Our null distirbution is N(0, 1) and our test statistic is 1.143.
+
+```{r}
+# Visualization of two-sided p-value
+gnorm(col = "black") +
+  geom_vline(xintercept = 1.143, color = "red", lty = 2) +
+  geom_norm_fill(a = 1.143, fill = "dodgerblue",
+                     scale = T) +
+    geom_norm_fill(b = -1.143, fill = "dodgerblue",
+                     scale = T)
+```
+
+P-value calculation:
+
+```{r}
+pnorm(-1.143) + pnorm(1.143, lower.tail = F)
+# or
+2*pnorm(1.143, lower.tail = F)
+```
 
