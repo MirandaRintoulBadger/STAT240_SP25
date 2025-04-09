@@ -927,7 +927,7 @@ chimpanzee %>%
 
 > The **Agresti-Coffe** adjustment can be thought of as the **difference in proportions** version of the single proportion **Agresti-Coull** adjustment.
 
-> Just like its single proportion equivalent, this "A-C" adjustment adds two successes and four failures to the dataset; but for two proportions, we **split them evenly amongst the two groups.**
+> Just like its single proportion equivalent, this "A-C" adjustment adds two successes and two failures to the dataset; but for two proportions, we **split them evenly amongst the two groups.**
 
 > $\hat{p_{1AC}} = \frac{X_1 + 1}{n_1 + 2}$, and $\hat{p_{2AC}} = \frac{X_2 + 1}{n_2 + 2}$. These adjustments carry through to the calculations of the point estimate and standard error.
 
