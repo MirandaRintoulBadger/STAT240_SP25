@@ -1,0 +1,150 @@
+---
+title: "week12_004-live"
+output: html_document
+date: "2025-04-07"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+X is the number of prosocial choice a chimpanzee makes with a partner. Let $p_{partner}$ be the notation for the true proportion of prosocial choices that chimpanzee make with a partner. 
+
+$$X \sim Binom(610, p_{partner})$$
+
+
+```{r}
+x = 359 
+n = 610
+```
+
+```{r}
+# 98% Confidence Interval for the true proportion of prosocial choices a chimpazee makes with a partner
+
+# Wald adjustment
+
+p_hat = x/n
+c = 0.98
+cv = qnorm(c+(1-c)/2)
+se = sqrt(p_hat*(1-p_hat)/n)
+# CI is
+p_hat + c(-1,1)*cv*se
+```
+
+```{r}
+#AC adjustment
+
+p_hat_AC = (x+2)/(n+4)
+cv
+se_AC = sqrt(p_hat_AC*(1-p_hat_AC)/(n+4))
+
+# CI is
+p_hat_AC + c(-1,1)*cv*se_AC
+```
+
+Null distribution: $$X_{H_0} \sim Binom(90, 0.5)$$ 
+
+$$p-val = P(X\geq 60)$$
+
+```{r}
+pbinom(59, 90, 0.5, lower.tail = F)
+
+# p-val = 0.001
+# level of significance is 1%
+# alpha = 0.01
+
+# since p-val < alpha, we reject H_0
+```
+
+```{r}
+# two tailed test
+
+p_val_2 = 2* pbinom(59, 90, 0.5, lower.tail = F) # we can multiply by because for p = 0.5, we get a symmetric binomial distribution
+```
+
+$$H_0: p =0.25, H_{\alpha}: p \neq 0.25$$
+
+$X_{H_0} \sim Binom(200, 0.25)$
+
+
+```{r}
+x = 57
+n = 200
+p_hat = x/n
+
+p_val = pbinom(57, 200, 0.25, lower.tail = F)
+p_val
+
+dbinom(57, 200, 0.25)
+
+tibble(x = 10:60, prob = dbinom(x, 200, 0.25), compare = prob < dbinom(57, 200, 0.25))
+
+p_val_two_sided = pbinom(42, 200, 0.25) + pbinom(57, 200, 0.25, lower.tail = F)
+
+p_val_two_sided
+2*p_val # not the right p-val for the two sided test because the null distribution is not symmetric
+```
+
+
+```{r}
+# 99% confidence interval
+
+x1 = 60
+n1 = 90
+x2 = 16
+n2 = 30
+
+p_1_hatAC = (x1+1)/(n1+2)
+p_2_hatAC = (x2+1)/(n2+2)
+c = 0.99
+cv = qnorm(c + (1-c)/2)
+se = sqrt((p_1_hatAC*(1-p_1_hatAC)/(n1+2))+(p_2_hatAC*(1-p_2_hatAC)/(n2+2)))
+(p_1_hatAC-p_2_hatAC) + c(-1,1)*cv*se
+```
+
+# Hypothesis Testing
+
+### Step 1: Model Statement
+
+$$X_1 = \text{no. of prosocial choice Chimp A makes with a partner} \sim Binom(90, p_1)\\
+
+X_2 = \text{no. of prosocial choice Chimp A makes with no partner} \sim Binom(30, p_2)$$
+
+
+### Step 2: State the hypothesis
+
+$$H_0: p_1 = p_2 \rightarrow p_1-p_2 = 0 \\
+H_{\alpha}: p_1 > p_2 \rightarrow p_1-p_2 > 0$$
+
+### Step 3: Finding the test statistic and the null hypothesis
+
+```{r}
+x1 = 60
+n1 = 90
+x2 = 16
+n2 = 30
+
+p1_hat = x1/n1
+p2_hat = x2/n2
+
+p_tilde = (x1+x2)/(n1+n2)
+
+z = (p1_hat - p2_hat)/se
+z
+
+p_val = pnorm(z, lower.tail = F)
+p_val
+
+# at 2% level of significance
+
+# p-val > alpha=0.02, we fail to reject H_0
+```
+
+
+
+
+
+
+
+
+

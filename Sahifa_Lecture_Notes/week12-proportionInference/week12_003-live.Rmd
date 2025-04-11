@@ -1,0 +1,131 @@
+---
+title: "week12_003-live"
+output: html_document
+date: "2025-04-07"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+We are going build a Confidence Interval for the proportion of prosocial choice that chaimpanzees make with a partner. $p_{partner}$ is the notation used for the true probability/proportion.
+
+$$X \sim Binom(610, p_{partner})$$
+So the point estimate is going to $\hat{p}_{partner}$
+
+
+```{r}
+# 98% confidence interval for p_{partner} using the Wald adjustment
+
+x = 359
+n = 610
+p_hat = x/n
+cv = qnorm(0.98+(1-0.98)/2)
+cv
+se = sqrt(p_hat*(1-p_hat)/n)
+#CI
+
+p_hat + c(-1, 1)*cv*se
+```
+
+```{r}
+# 98% confidence interval for p_{partner} using the Agresti-Coull adjustment
+
+p_hat_AC = (x+2)/(n+4)
+cv 
+se_AC = sqrt(p_hat_AC*(1-p_hat_AC)/(n+4))
+
+p_hat_AC + c(-1, 1)*cv*se_AC
+```
+
+```{r}
+# P(X >= 60)
+
+pbinom(59, 90, 0.5, lower.tail = F)
+
+1 - pbinom(59, 90, 0.5)
+
+# significance level 1%
+
+
+```
+
+Since $\alpha=0.01$, we get that $p-val<\alpha$, so we reject $H_0$. 
+
+```{r}
+dbinom(60, 90, 0.5)
+```
+
+```{r}
+tibble(x = 20:70, prob = dbinom(x, 90, 0.5), compare = prob < dbinom(60, 90, 0.5))
+```
+
+p-val = P(X<= 30)+P(X>= 60)
+
+```{r}
+pbinom(30, 90, 0.5) + pbinom(59, 90, 0.5, lower.tail = F)
+```
+
+
+```{r}
+x1 = 60
+n1 = 90
+x2 = 16
+n2 = 30
+
+p_hat_1AC = (x1+1)/(n1+2)
+p_hat_2AC = (x2+1)/(n2+2)
+
+# 99% confidence interval
+
+c = 0.99
+(p_hat_1AC-p_hat_2AC) + c(-1, 1)*qnorm(c + (1-c)/2)*sqrt((p_hat_1AC*(1-p_hat_1AC)/(n1+2))+(p_hat_2AC*(1-p_hat_2AC)/(n2+2)))
+```
+
+Hypothesis Testing for difference of proportions:
+
+$$H_0: p_1=p_2 \rightarrow p_1-p_2=0 \\ H_0={\alpha}: p_1 > p_2 \rightarrow p_1-p_2 > 0$$
+```{r}
+x1 = 60
+n1 = 90
+x2 = 16
+n2 = 30
+
+p1_hat  = x1/n1
+p2_hat = x2/n2
+
+p_tilde  = (x1+x2)/(n1+n2)
+
+se = sqrt((p_tilde*(1-p_tilde)/n1)+(p_tilde*(1-p_tilde)/n2))
+
+z = (p1_hat-p2_hat)/se
+z
+
+p_val = pnorm(z, lower.tail = F)
+p_val
+
+# at 2% level of significance
+
+# we have enough evidence to support H_alpha
+```
+
+$$H_0: p_1=p_2 \rightarrow p_1-p_2=0 \\ H_0={\alpha}: p_1 \neq p_2 \rightarrow p_1-p_2 \neq 0$$
+
+
+```{r}
+p_val_2_sided = 2*p_val
+p_val_2_sided
+```
+
+
+
+
+
+
+
+
+
+
+
+
+

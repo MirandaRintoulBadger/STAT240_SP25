@@ -1,0 +1,116 @@
+---
+title: "week12_001-live"
+output: html_document
+date: "2025-04-07"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+x = 359
+n = 610
+p_hat = x/n
+```
+
+
+```{r}
+# 95% CI for p_ps using the wald adjustment
+
+cv <- qnorm(0.975)
+se <- sqrt(p_hat*(1-p_hat)/n)
+cv
+se
+p_hat + c(-1, 1)*cv*se
+```
+
+```{r}
+# 95% CI for p_ps using the AC adjustment
+
+p_hat_AC <- (x+2)/(n+4)
+cv
+se_AC <- sqrt(p_hat_AC*(1-p_hat_AC)/(n+4))
+se_AC
+p_hat_AC + c(-1,1)*cv*se_AC
+```
+
+```{r}
+# Hyp testing at 1% significance level 
+
+p_val = pbinom(59, 90, 0.5, lower.tail = F)
+p_val
+
+# alpha = 0.01 
+
+# Hyp testing at 10% significance level 
+# alpha = 0.1
+```
+
+```{r}
+library(tidyverse)
+# two tailed test
+
+tibble(
+  x = 10:70,
+  prob = dbinom(x, 90, 0.5),
+  lessThanP57 = prob < dbinom(60, 90, 0.5)
+)
+
+```
+
+```{r}
+p_val_t = pbinom(30, 90, 0.5) + pbinom(59, 90, 0.5, lower.tail = F) 
+p_val_t
+
+2*p_val
+```
+
+```{r}
+x1 = 60
+n1 = 90
+x2 = 16
+n2 = 30
+
+# 98% Confidence interval for p1-p2 (AC adj)
+
+p_1_hatAC = (x1+1)/(n1+2)
+p_2_hatAC = (x2+1)/(n2+2)
+c = 0.98
+cv = qnorm(c+(1-c)/2)
+se = sqrt((p_1_hatAC*(1-p_1_hatAC)/(n1+2))+(p_2_hatAC*(1-p_2_hatAC)/(n2+2)))
+
+(p_1_hatAC-p_2_hatAC) + c(-1,1)*cv*se
+```
+
+```{r}
+# at 2% level of significance conduct a test for p1-p2
+
+x1 = 60
+n1 = 90
+x2 = 16
+n2 = 30
+
+p1_hat = x1/n1
+p2_hat = x2/n2
+p_tilde = (x1+x2)/(n1+n2)
+se_test_statistic = sqrt(p_tilde*(1-p_tilde)/n1 + p_tilde*(1-p_tilde)/n2)
+
+
+z = (p1_hat - p2_hat)/se_test_statistic
+z
+
+p_val_one_sided = pnorm(z, lower.tail = F)
+p_val_two_sided =  2 * p_val_one_sided
+
+# 2% level of significance 
+alpha = 0.02
+
+# comparing p-val and alpha, we get that we fail to reject H-0, that is, the difference in proportion is zero. Which is also supported by the 98% CI, because that CI covers 0.
+```
+
+
+
+
+
+
