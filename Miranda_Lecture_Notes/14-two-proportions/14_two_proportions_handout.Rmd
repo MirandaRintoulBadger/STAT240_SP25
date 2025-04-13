@@ -1,0 +1,140 @@
+---
+title: "Section 14: Two-Sample Proportion Inference"
+author: "Student's Name Here"
+date: "2024-10-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error = TRUE)
+```
+
+```{r}
+library(tidyverse)
+source("../../scripts/ggprob.R")
+```
+
+
+
+# CI for p_1 - p_2
+
+Return to the chimpanzee data from last section.
+
+```{r}
+chimpanzee <- read_csv("../../data/chimpanzee.csv")
+
+head(chimpanzee)
+```
+
+What is the difference in the proportion of prosocial choices by chimpanzee C with versus without a partner?
+
+```{r}
+chimpanzee %>% 
+  filter(actor == "C") %>% 
+  mutate(HasAPartner = (partner != "none")) %>% 
+  group_by(HasAPartner) %>% 
+  summarize(totalProsocial = sum(prosocial),
+            totalSelfish = sum(selfish), 
+            n = totalProsocial + totalSelfish, 
+            p_hat = totalProsocial/n)
+```
+
+Let's build a CI with the Agresti-Coffe adjustment.
+
+```{r}
+x1 <- 57
+n1 <- 90
+x2 <- 17
+n2 <- 30
+
+# This code computes the AC Confidence Interval for the true difference in two proportions
+n_AC1 <- n1 + 2
+n_AC2 <- n2 + 2
+p_AC1 <- (x1+1)/n_AC1
+p_AC2 <- (x2+1)/n_AC2
+
+pt_est <- p_AC1 - p_AC2
+
+se <- sqrt( p_AC1*(1-p_AC1)/n_AC1 + p_AC2*(1-p_AC2)/n_AC2 )
+
+cv <- qnorm(0.975)
+
+c(pt_est - cv*se, pt_est + cv*se)
+```
+
+
+### Try it out
+
+Build a 95% AC CI for the difference in prosocial behavior for chimpanzee B with and without a partner.
+
+```{r}
+
+```
+
+
+## Hypothesis testing for p_1 - p_2
+
+Let's look at chimpanzee C again:
+
+```{r}
+chimpanzee %>% 
+  filter(actor == "C") %>% 
+  mutate(HasAPartner = (partner != "none")) %>% 
+  group_by(HasAPartner) %>% 
+  summarize(totalProsocial = sum(prosocial),
+            totalSelfish = sum(selfish), 
+            n = totalProsocial + totalSelfish, 
+            p_hat = totalProsocial/n)
+```
+
+
+Now, conduct a hypothesis test for the difference in proportions.  The standard error is calculated with an estimated common proportion, p-hat.
+
+```{r}
+x1 <- 57
+n1 <- 90
+x2 <- 17
+n2 <- 30
+
+p_hat <- (x1 + x2)/(n1 + n2)
+
+numerator <- (x1/n1) - (x2/n2)  # Observed difference in proportions
+
+denominator <- sqrt(p_hat*(1-p_hat)*(1/n1 + 1/n2))  # Standard error
+
+test_stat <- numerator/denominator
+test_stat
+```
+
+If H0 is true and p_1 = p_2, then our test statistic came from N(0, 1).  We use the standard normal as our null distribution.  We want to find the area above our test statistic to find evidence that p_1 - p_2 is positive.
+
+```{r}
+# Visualization of one-sided p-value
+gnorm(col = "black") +
+  geom_vline(xintercept = 0.65, color = "red", lty = 2) +
+  geom_norm_fill(a = 0.65, fill = "dodgerblue",
+                     scale = T)
+```
+
+```{r}
+pnorm(test_stat, lower.tail = F)
+```
+
+
+### Try it out
+
+Perform a test of *two-sided* hypotheses for p_1 - p_2 != 0, for chimpanzee B.
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
