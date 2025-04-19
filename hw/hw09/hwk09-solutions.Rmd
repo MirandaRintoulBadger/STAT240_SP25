@@ -191,12 +191,12 @@ summary(weather_mod)
 
 > The test statistic is 
 
-$$\frac{\hat{\beta}_1 - 0}{\hat{se}(\hat{\beta}_1)} = \frac{1.062498}{0.005787} = 183.6$$
+$$\frac{\hat{\beta}_1 - 1}{\hat{se}(\hat{\beta}_1)} = \frac{0.062498}{0.005787} = 10.8$$
 
 > Under the null, this comes from a T distribution with $n - 2 = 3317$ degrees of freedom.  Since our alternative suggests we are looking for a result in the positive direction, our p-value is the area on a $T_{3317}$ curve *above* 183.6.
 
 ```{r}
-pt(183.6, df = 3317, lower.tail = F)
+pt(10.8, df = 3317, lower.tail = F)
 ```
 
 > Our p-value is virtually 0, so we reject the null.  We have evidence that the linear relationship between dew point and minimum temperature is greater than 1.

@@ -605,15 +605,15 @@ gives hypotheses</p>
 <p>The test statistic is</p>
 </blockquote>
 <p><span class="math display">\[\frac{\hat{\beta}_1 -
-0}{\hat{se}(\hat{\beta}_1)} = \frac{1.062498}{0.005787} =
-183.6\]</span></p>
+1}{\hat{se}(\hat{\beta}_1)} = \frac{0.062498}{0.005787} =
+10.8\]</span></p>
 <blockquote>
 <p>Under the null, this comes from a T distribution with <span class="math inline">\(n - 2 = 3317\)</span> degrees of freedom. Since
 our alternative suggests we are looking for a result in the positive
 direction, our p-value is the area on a <span class="math inline">\(T_{3317}\)</span> curve <em>above</em> 183.6.</p>
 </blockquote>
-<pre class="r"><code>pt(183.6, df = 3317, lower.tail = F)</code></pre>
-<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>pt(10.8, df = 3317, lower.tail = F)</code></pre>
+<pre><code>## [1] 4.768802e-27</code></pre>
 <blockquote>
 <p>Our p-value is virtually 0, so we reject the null. We have evidence
 that the linear relationship between dew point and minimum temperature
