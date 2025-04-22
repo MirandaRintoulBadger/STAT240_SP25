@@ -49,11 +49,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # 3. Joining 
 
-* Use `str_c` to combine multiple character vectors into a single character vector
 * Use `str_sub` to extract elements from a string
-* Use `str_remove_all` to remove a certain symbol
-* Use `str_to_upper` to uppercase a character string
-
+* The datasets need to be joined by *both* episode number and title
 
 # 4. Statistical Inference
 

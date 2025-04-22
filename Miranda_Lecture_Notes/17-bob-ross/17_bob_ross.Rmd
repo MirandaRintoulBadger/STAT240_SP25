@@ -227,74 +227,59 @@ This is a real painting that appeared on the show, made by Bob's instructor, Joh
 
 # 3. Joining the Two Datasets
 
-We are interested in comparing the color features from the `painting_colors` dataframe to various features of the FiveThirtyEight `all_elements` dataframe.
+* We are eventually interested in comparing the color features from the `painting_colors` dataframe to various features of the FiveThirtyEight `all_elements` dataframe.
 
-We need to join the two datasets together, However, the dataframes don't share a variable or variables that we can join by...
+* We need to `join` the two datasets together.
+
+* However, the dataframes don't share a variable or variables that we can join by... yet.
 
 ```{r}
-all_elements %>% 
+painting_elements %>% 
   select(EPISODE, TITLE)
 
 painting_colors %>% 
   select(season, episode, painting_title)
 ```
 
-* Write code to create a common variable or variables across the two dataframes, and then join them. Save this joined dataframe as `paintings_joined`.
 
-* There are three potential ways to do this, including:
-    - Combining `episode` and `season` from `painting_colors` into one variable which mimics `EPISODE` from `all_elements`
-    - Separating `EPISODE` into two variables which mimic `episode` and `season`
-    - Making `TITLE` and `painting_title` compatible. (Not a good idea.)
-    
-**Note: This requires string manipulation which we have not taught in this iteration of STAT 240.**
+* In addition, we want to only use the paintings where Bob Ross was the host.
+
+* So, our strategy will be the following:
+
+  - Use string commands to create `season` and `episode` variables in the `painting_elements` data set
+  - Keep only the columns `painting_title`, `season`, `episode`, `num_colors`, and specific color columns (from `Black_Gesso` to `Alizarin_Crimson`) from the `painting_colors` data set.
+  - Use `left_join()` to add columns from the modified `painting_colors` to `painting_elements`.
+
     
 ```{r}
-# Approach 1: format episode and season into EPISODE
-# This combines boolean logic and string manipulation
-painting_colors %>%
-  mutate(seasonChar = ifelse(season < 10, str_c("S0", season), str_c("S", season)),
-         episodeChar = ifelse(episode < 10, str_c("E0", episode), str_c("E", episode)),
-         EPISODE = str_c(seasonChar, episodeChar)) %>% 
-  select(season, episode, seasonChar, episodeChar, EPISODE)
-
-paintings_joined <- painting_colors %>%
-  mutate(seasonChar = ifelse(season < 10, str_c("S0", season), str_c("S", season)),
-         episodeChar = ifelse(episode < 10, str_c("E0", episode), str_c("E", episode)),
-         EPISODE = str_c(seasonChar, episodeChar)) %>%
-  # The type of join we use doesn't matter since they have the same 403 rows
-  full_join(all_elements, join_by(EPISODE))
-```
-
-```{r}
-# Approach 2: Split EPISODE into episode and season
-all_elements %>% 
+# Split EPISODE into episode and season in painting_elements
+painting_elements <- painting_elements %>% 
   mutate(season = as.numeric(str_sub(EPISODE, 2, 3)),
-         episode = as.numeric(str_sub(EPISODE, 5, 6))) %>% 
-  # Just to display what season and episode are
-  relocate(season, episode)
+         episode = as.numeric(str_sub(EPISODE, 5, 6)),
+         .after = EPISODE)
 
-paintings_joined <- all_elements %>% 
-    mutate(season = as.numeric(str_sub(EPISODE, 2, 3)),
-          episode = as.numeric(str_sub(EPISODE, 5, 6))) %>% 
-  full_join(painting_colors) %>% 
-  select(EPISODE, TITLE, painting_title, num_colors, TREE)
+painting_elements
+
+# Select desired columns from painting_colors
+painting_colors_temp <- painting_colors %>% 
+  select(season, episode, painting_title, num_colors,
+         Black_Gesso:Alizarin_Crimson)
+
+# Join the data sets and put the title columns next to each other
+ross <- painting_elements %>% 
+  left_join(painting_colors_temp, by = join_by(season, episode)) %>% 
+  relocate(painting_title, .after = TITLE)
+
+## Eliminate redundant columns, rename EPISODE
+ross <- ross %>% 
+  select(-TITLE) %>% 
+  rename(ID = EPISODE)
 ```
 
 
 # 4. Statistical Inference
 
-We will use `paintings_joined` to investigate some interesting inference questions.
-
-```{r}
-# Some light cleaning: getting rid of some columns and moving identifying columns to the front
-
-paintings_joined <- paintings_joined %>%
-  # neat little trick; you can rename and reorder columns within select!
-  select(EPISODE, season, episode, painting_title, num_colors, AURORA_BOREALIS:WINTER, Black_Gesso:Alizarin_Crimson)
-
-paintings_joined
-```
-
+We will use `ross` to investigate some interesting inference questions.
 
 ## 4.1 Single Proportion
 
@@ -306,6 +291,15 @@ On board: Form of confidence interval and AC adjustment
 
 
 * Construct a 95% Agresti-Coull confidence interval for the true percentage/chance that a man-made `STRUCTURE` appears in a given painting.  Interpret it in context.
+
+```{r}
+structure_summary <- ross %>% 
+  summarize(structures = sum(STRUCTURE),
+    n = n())
+
+structure_summary
+```
+
 
 ```{r}
 # Write your code here!
@@ -338,7 +332,22 @@ Conduct a two-sided hypothesis test to assess the evidence that the true percent
 
 ## 4.2 Difference in Proportions
 
+Is there an association between the appearance of a man-made structure and the appearance of grass in a painting? Consider two populations: paintings in our hypothetical population with and without grass.
+
+Let $p_1$ represent the population proportion of paintings with man-made structures **among paintings which include grass** and $p_2$ be the same proportion **among paintings without grass**.
+
 * Construct a 90% confidence interval for the difference in true proportions of a manmade structure appearing in episodes hosted by Bob vs. episodes hosted by guests.  Interpret your interval in context.
+
+```{r}
+two_prop <- ross %>% 
+  group_by(GRASS) %>% 
+  summarize(x = sum(STRUCTURE),
+            n = n(),
+            phat = x/n)
+
+two_prop
+```
+
 
 ```{r}
 # Write code here!
@@ -358,6 +367,16 @@ Conduct a two-sided hypothesis test to assess the evidence that the true percent
 * Compute a 95% confidence interval for the true average number of colors (`num_colors`) used in a TJOP painting.  Interpret your interval in context.
 
 ```{r}
+colors_summary <- ross %>% 
+  summarize(xbar = mean(num_colors),
+            s = sd(num_colors), 
+            n = n())
+
+colors_summary
+```
+
+
+```{r}
 # Write code here!
 
 ```
@@ -372,7 +391,16 @@ Conduct a two-sided hypothesis test to assess the evidence that the true percent
 
 ## Difference in Means
 
-* Conduct a hypothesis test to assess the evidence for a difference in true average number of colors used in TJOP episodes hosted by Bob Ross versus episodes hosted by guests.  Use $\alpha = 0.05$ and interpret your results in context.
+* Conduct a hypothesis test to assess the evidence for a difference in true average number of colors used in Bob Ross TJOP paintings with and without grass.  Use $\alpha = 0.05$ and interpret your results in context.
+
+```{r}
+colors_summary <- ross %>%
+  group_by(GRASS) %>%
+  summarize(xbar = mean(num_colors),
+            s = sd(num_colors), 
+            n = n())
+```
+
 
 ```{r}
 # Write code here!
@@ -389,17 +417,32 @@ Conduct a two-sided hypothesis test to assess the evidence that the true percent
 
 ## Linear Regression
 
-* Conduct a hypothesis test for a POSITIVE linear relationship between the number of features (as Y) in a painting and the number of colors (as X).  Code to create a "number of features" column is provided for you.
+* Conduct a hypothesis test for a POSITIVE linear relationship between the number of features (as Y) in a painting and the number of colors (as X).  Code to create a "number of features" column as well as a scatterplot is provided for you.
 
 ```{r}
-total_features_vector <- paintings_joined %>%
-  select(AURORA_BOREALIS:WINTER) %>%
-  select(!contains("FRAME")) %>%
-  rowSums()
+lm_data <- ross %>% 
+  select(ID, num_colors, AURORA_BOREALIS:WINTER) %>% 
+  pivot_longer(AURORA_BOREALIS:WINTER,
+               names_to = "feature",
+               values_to = "count") %>% 
+  group_by(ID, num_colors) %>% 
+  summarize(num_features = sum(count))
 
-paintings_joined <- paintings_joined %>%
-  mutate(num_features = total_features_vector)
+lm_data
 
+ggplot(lm_data, aes(x = num_colors, y = num_features)) +
+  geom_point(position = position_jitter(height = 0.2, width = 0.2),
+             pch = ".") +
+  geom_smooth(method = "lm") +
+  labs(
+    x = "# of colors",
+    y = "# of features",
+    title = "Bob Ross The Joy of Painting"
+  )
+```
+
+
+```{r}
 # Write code here!
 
 ```
