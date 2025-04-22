@@ -1,0 +1,919 @@
+---
+title: "STAT 240: The Bob Ross Case Study: Solutions"
+author: "Cameron Jones and Bret Larget"
+date: "Spring 2025"
+output: rmdformats::readthedown
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
+                      error = TRUE, fig.height = 4)
+library(tidyverse)
+source("../../scripts/ggprob.R")
+
+theme_set(theme_minimal())
+
+```
+
+# Overview
+
+## Learning Outcomes
+
+* There may be a few new functions and tricks in these lectures, but the purpose of this case study is not to convey new material. The purpose is to **review** the principles we have learned and to **practice** interactively on a real case study.
+
+* Furthermore, and this is somewhat cheesy, but another purpose of this case study is to **celebrate** how much you all have learned this semester! Especially if you came in with no coding experience, the things you can do now would be very impressive to yourself just a few months ago! 
+    
+## Preliminaries
+
+* You will need the `tidyverse` package which you should have from previous lectures.
+
+* Files to download to `COURSE/lecture/week14-bob-ross`:
+    - `week14-bob-ross-bret-version.Rmd`
+    - `week14-bob-ross-bret-version.html`
+    - `week14-bob-ross-solutions-bret-version.Rmd`
+    - `week14-bob-ross-solutions-bret-version.html`
+    
+* Files to download to `COURSE/data`
+    - `elements-by-episode.csv`
+    - `bob_ross_paintings.csv`
+    
+* Files to download to `COURSE/scripts` (*You likely have this from previous lectures*)
+    - `ggprob.R`
+    
+# Background
+
+* As mentioned in the learning outcomes, the purpose of this case study is not to convey new material. The purpose is to **review** the principles we have learned and **practice** interactively on a real case study.
+
+* Inspiration and a dataset for this case study comes from FiveThirtyEight's 2014 article, [A Statistical Analysis of the Work of Bob Ross](https://fivethirtyeight.com/features/a-statistical-analysis-of-the-work-of-bob-ross/).
+
+---
+
+* *"The Joy of Painting"* (TJOP) was a PBS show which ran from 1983 to 1994, for a total of 403 episodes. It was primarily hosted by Bob Ross.
+
+* Each episode [(example)](https://www.youtube.com/watch?v=lLWEXRAnQd0&list=PLAEQD0ULngi67rwmhrkNjMZKvyCReqDV4) was half an hour, over which Bob (or the guest host) would guide the viewer through their process of painting a nature scene. 
+
+* Bob Ross became well known for his slow, soothing voice, the gentle positivity of his shows, and his iconic catchphrases (such as "happy little trees", and "there are no mistakes, just happy accidents").
+
+# Elements by Episode
+
+* Our first dataset, `elements-by-episode.csv`, is courtesy of FiveThirtyEight, and can be found [here](https://github.com/fivethirtyeight/data/tree/master/bob-ross).
+    - This is the dataset used in the background article cited above.
+    - The authors of the FiveThirtyEight article manually watched and coded all 403 episodes of *The Joy Of Painting* to generate this dataset.
+
+> Each of the 403 rows of `elements-by-episode.csv` represents one painting. This is equivalent to representing one episode, since there was exactly one painting each episode.
+
+
+```{r}
+all_elements = read_csv("../../data/elements-by-episode.csv")
+
+head(all_elements)
+```
+
+* There are **69** columns in `all_elements`. `EPISODE` is a unique identifier for each episode, and takes on values like `S01E02` to indicate "first season, second episode".
+
+* `TITLE` is the name of the painting/episode, e.g. `"MT. MCKINLEY"`. Note that the values of `TITLE` have quotes on either side built into them. That might be annoying later. We also hesitate to say if `TITLE` is a unique identifier, as they may be repeated (as we are about to investigate).
+
+* The other 67 columns are potential features of the painting, such as `BARN`, `BEACH`, or `BRIDGE` which have value `0` if that painting did NOT contain that feature, and value `1` if that painting DID contain that feature.
+    - Some features are redundant with each other.
+    - For example, `TREE` indicates the presence of any tree, while `CONIFER`, `DECIDUOUS`, and `PALM_TREES` indicate more specific types of tree and `TREES` indicates more than one tree.
+    - Similarly, some features are about the frame and not the painting itself.
+    - Examples are `FRAMED` which indicates if the painting has a frame and `OVAL_FRAME`, `SEASHELL_FRAME` and others ending in `_FRAME` which describe the type of frame.
+    - Furthermore, some columns provide information on who the host of the show was.
+    - Columns `DIANE_ANDRE` and `STEVE_ROSS` indicate specific guest hosts and`GUEST` indicates if there was a guest host.
+
+
+## Are Any Titles Repeated?
+
+* Knowing which variables  **uniquely identify** each row of your dataframe is crucial for many data operations, including `join`s, which we will eventually use.
+
+* It is tempting to think `TITLE` is a unique identifier, but it may not be.
+
+> Write code to determine which values of `TITLE`, if any, are used more than once.
+
+```{r}
+# Write code here to determine if which values of TITLE, if any, appear multiple times.
+
+all_elements %>% 
+  count(TITLE) %>% 
+  filter(n > 1)
+```
+
+```{r}
+all_elements %>%
+  filter(TITLE == "\"LAKESIDE CABIN\"" |
+           TITLE == "\"MOUNTAIN WATERFALL\"") %>%
+  select(EPISODE, TITLE)
+```
+
+* We find that "LAKESIDE CABIN" (S08E02, S10E13) and "MOUNTAIN WATERFALL" (S02E12, S05E01) are used twice.
+
+* Thus, `TITLE` is NOT a unique identifier, but `EPISODE` is.
+
+## Which Features Appear The Most?
+
+* Now, let's investigate which painting features appear most often.
+
+* The [data description](https://github.com/fivethirtyeight/data/blob/master/bob-ross/README.md) doesn't tell you what each column is... which can be an issue since **not every column in the dataframe represents a feature of the painting itself**. 
+
+* We will first filter to just Bob's episodes and then remove columns related to guest hosts and the frame.
+
+> Write code which removes the frame and host columns, filters just to episodes hosted by Bob Ross, and saves the result as a new dataframe called `painting_elements`.
+    
+```{r}
+# Write code here to remove the frame and host columns and filter to Bob Ross' episodes. Save this dataframe, which has just EPISODE, TITLE, and the painting-based features, as a separate frame named elements.
+
+# Note: We've purposefully put those instructions in backwards order to make you deal with an error.
+
+painting_elements = all_elements %>% 
+  filter(GUEST == 0) %>% 
+  select(-c(DIANE_ANDRE, STEVE_ROSS, GUEST, contains("FRAME")))
+
+# contains("FRAME") is an example of the helper functions that exist for use within select() and other column editing functions!
+
+# painting_elements should have 381 rows (one for each Bob episode) and 50 columns (EPISODE, TITLE, and 48 features). Check with dim(painting_elements).
+```
+
+> Write code which produces a dataframe indicating how frequently each feature appears. 
+
+* Because the values of the columns are 0s and 1s, we can use `sum()` to calculate their total appearances or `mean()` to get a proportion.
+
+* We have 48 features (each with their own column) to summarize, too many to manually list out! We'll explore **two ways** around this issue: one using `across()` and another solution using pivoting and grouping.
+    
+```{r}
+# Approach 1: Using across()
+painting_elements %>% 
+  summarize(across(AURORA_BOREALIS:WINTER, mean))
+```
+
+##### A Brief Sidenote on `across()`
+
+*You will NOT be tested on `across()`, nor any new material that shows up in these Bob Ross lectures.*
+
+- `across()` is for use within `dplyr` functions that make edits to columns; e.g. `mutate()` and `summarize()`. Rather than give `mutate()` or `summarize()` a list of expressions in the form `newColumnName = expression`, you give it just a single call to `across(columns, function)`, and it will apply `function` to every column you tell it to.
+
+> `across()` is helpful for applying the same function to many more columns than it is reasonable to manually list out.
+
+* The first argument can be an explicit vector of column frames, e.g. `c(columnName1, columnName2, ...)`, a sequence of columns, e.g. `columnName1:columnName4`, or a logical selector function like `starts_with()`, `ends_with()`, or `contains()`. 
+    - See all the selection helper functions with `?starts_with`.
+
+- Second, the NAME of a function. You are not calling the function with parentheses at the end, as in `sum()`, you are just passing in the name, like `sum`.
+
+- For example, to apply the `mean` function to each of the columns whose names contain the characters "FRAME", 
+
+```{r}
+all_elements %>% 
+  summarize(across(contains("FRAME"), mean))
+```
+
+```{r, eval = FALSE}
+# Equivalent to:
+all_elements %>% 
+  summarize(APPLE_FRAME = mean(APPLE_FRAME),
+            CIRCLE_FRAME = mean(CIRCLE_FRAME),
+            DOUBLE_OVAL_FRAME = mean(DOUBLE_OVAL_FRAME),
+            and so on...)
+```
+
+##### Back to Painting Features
+
+* Before we took that detour, we were determining which painting feature occurs most often in Bob Ross' paintings.
+
+* There were too many to do manually, so we first explored `across()`. However, there is a second approach with pivoting and group_by which does the same computations in a slightly different way.
+
+```{r}
+# Approach 2: Using pivoting, and then group_by()
+
+# If each feature's appearance was on its own row, we could just count the accompanying 0s and 1s with each type of feature.
+# We can get each feature's appearance or non-appearance in its own row by pivoting.
+# After pivoting, each row will be a painting-feature combination; so we should have 381 Bob Ross episodes x 48 features (excluding hosts and frames) = 18,288 rows.
+
+painting_elements_long = painting_elements %>% 
+  pivot_longer(-c(EPISODE, TITLE), 
+               names_to = "feature", values_to = "appeared")
+```
+
+```{r}
+# Now, we can sum up the "appeared" column separately for each different "feature".
+painting_element_counts = painting_elements_long %>% 
+  group_by(feature) %>% 
+  summarize(n = sum(appeared),
+            pct = round(mean(appeared)*100)) %>%
+  arrange(desc(pct))
+
+painting_element_counts
+```
+
+## Visualization
+
+> Using the results of the previous exercise, imitate the following visualization:
+
+![A horizontal bar chart from FiveThirtyEight's article at https://fivethirtyeight.com/features/a-statistical-analysis-of-the-work-of-bob-ross/.](https://fivethirtyeight.com/wp-content/uploads/2014/04/hickey-ross-tags-1.png?resize=665,1024)
+
+* Our visualization will be slightly different than FiveThirtyEight's; theirs includes frames, and makes some modifications to the column names for clarity.
+
+Important features of the graph to recreate include:
+
+- Title and subtitle, axis labels
+- The ordering of the bars
+- The feature names are not in all caps
+- The percentages are included as text to the right of each bar
+- The purposeful lack of axes and grid markings
+- Only features which appear at least 2% of the time are shown
+
+* Remember that creating a ggplot is an *iterative* process, and you shouldn't try to do all of these things at once! Get the base form, then add each customization one by one, checking your work as you go along.
+
+```{r}
+# The very base form of the graph: features on the left, with horizontal bars indicating percentages.
+painting_element_counts %>% 
+  filter(pct >= 2) %>% 
+  ggplot(mapping = aes(y = feature, x = pct)) + 
+  geom_col()
+```
+
+
+```{r, fig.height = 5, fig.width = 3}
+# Final "geom" element to add: the percentage labels through geom_text() and other aesthetics
+
+painting_element_counts %>% 
+  filter(pct >= 0.02) %>% 
+  ggplot(mapping = aes(y = reorder(feature, pct), x = pct)) +
+  geom_col(fill = "dodgerblue") +
+# label should be set within aes() because it is a variable aesthetic
+  geom_text(aes(label = pct),  hjust = "left") + 
+  labs(title = "The Paintings of Bob Ross", subtitle = "Percentage containing each element", x = "",
+    y = "") +
+  theme(
+    panel.grid = element_blank(),
+    axis.text.x = element_blank(),
+    plot.background = element_rect(fill = "gray96", color = "gray96"),
+    plot.title.position = "plot",
+    plot.title = element_text(face = "bold")
+  )
+
+
+ggsave("MyBobRossPlot.png")
+```
+
+# Colors by Episode
+
+* Our second dataset, `bob_ross_paintings.csv`, is courtesy of TwoInchBrush.com courtesy of GitHub user `jwilber`, and can be found [here](https://github.com/jwilber/Bob_Ross_Paintings).
+    - TwoInchBrush.com is a website dedicated to *The Joy of Painting*, including a database of information on each one, and GitHub user `jwilber` scraped and collected the data into one file.
+
+> Each of the 403 rows of `bob_ross_paintings.csv` represents one painting. Just like in the first dataset, this is equivalent to representing one episode, since there was exactly one painting each episode.
+
+- Recall, some of these episodes have hosts other than Bob Ross.
+
+```{r}
+painting_colors = read_csv("../../data/bob_ross_paintings.csv")
+
+nrow(painting_colors)
+```
+
+```{r}
+painting_colors %>% 
+  head()
+```
+
+* When we first read in the data, there are 28 columns giving information about the episode and the painting, with particular emphasis on the colors, but only a few we'll be interested in:
+    - `painting_title`, the title of the painting
+    - `season` and `episode`, which together uniquely identify each row,
+    - `num_colors`, the number of how many different colors the host uses,
+    - and 18 columns at the end with names ranging from `Black_Gesso` to `Alizarin_Crimson` which take on values 0 if that color does not appear in that painting, and 1 if it does.
+    
+* Also note that the format of `painting_title` is nicer (no quotes, not all caps) than the titles in `all_elements`.
+    
+## Visualization
+
+> Create a plot visualizing the distribution of the number of colors used, `num_colors`.
+
+---
+
+* There is an underlying consideration to be made here; should we treat `num_colors` as a discrete variable or a continuous one?
+    - It is most easily considered a discrete variable. It can only take on integers, and it happens to only take on integers in a relatively small range.
+    - However, we could treat it as a continuous one. To do so would be to overlook the fundamental nature of its values, but it would allow us to conduct means and regression inference on it.
+
+* This is a very common situation in real data science where the line is blurred between a discrete and continuous variable, and we often have to switch our thinking from one type to the other.
+
+> When we **visualize** `num_colors`, we will stay true to its discrete nature, but we will treat it as a continuous variable for inference purposes. 
+
+---
+
+```{r}
+# Write code here to visualize the distribution of num_colors.
+
+# Here's one option with geom_bar(), which I think is the best; the space between the bars emphasizes that num_colors cannot take on decimal values
+ggplot(painting_colors) +
+  geom_bar(aes(x = num_colors),
+                 color = "black", fill = "dodgerblue")  +
+  
+  # Improved axis labeling
+  scale_x_continuous(
+    breaks = 0:15
+  ) 
+
+# There are many other visual improvements we could make to this plot - see the previous visualization exercise for inspiration.
+```
+
+
+```{r}
+# You could also do this with geom_histogram().
+
+# By default, notice the bins are not centered around the whole numbers
+ggplot(painting_colors) +
+  geom_histogram(aes(x = num_colors))
+```
+
+```{r}
+# center = 12 could be any whole number, it just means to start with a bin that's 1.0 wide, centered at 12.0, and then build out from there.
+
+# However, I don't like this as much because the lack of gaps between the bars implies visually that num_colors can take on any value in this range.
+
+ggplot(painting_colors) +
+  geom_histogram(aes(x = num_colors), 
+                 binwidth = 1, center = 12,
+                 color = "black", fill = "dodgerblue")  +
+  
+  # Improved axis labeling
+  scale_x_continuous(
+    breaks = 0:15
+  )
+```
+
+```{r}
+# geom_density does an even worse job of emphasizing that num_colors only takes on integers.
+
+ggplot(painting_colors) +
+  geom_density(aes(x = num_colors),
+                 color = "black", fill = "dodgerblue")  +
+  
+  # Improved axis labeling
+  scale_x_continuous(
+    breaks = 0:15
+  )
+```
+
+##### Sidenote: What's that Outlier?
+
+* It looks like there's one painting that just has one color in it. Very often exploratory data analysis will lead to you discovering an outlier like this in a key variable, which leads to questions like:
+
+*"Is that real or a data entry error?"*
+
+*"If that was real, what was going on with that observation?"*
+
+* Very often, you will have to dedicate some outside research to these outliers!
+
+> Do some in-class investigation into the outlier - look at the painting and the video, links in the dataset!
+
+```{r}
+painting_colors %>% 
+  filter(num_colors == 1) %>% 
+  relocate(img_src, youtube_src, season, episode, painting_title)
+```
+
+* This dataset, luckily for us, has links to the associated painting and [video](https://www.youtube.com/embed/gnp6WE7Ql-s). The painting is shown below.
+
+![The Joy of Painting, Season 16, Episode 6: "A Contemplative Lady".](https://www.twoinchbrush.com/images/painting89.webp)
+
+* That doesn't look like something Bob would make! Let's spend a minute watching the [video](https://www.youtube.com/embed/gnp6WE7Ql-s) to see what's up.
+
+* This is a real painting that appeared on the show, made by Bob's instructor, John Thamm! 
+
+* This reminds us... some of these episodes are guest hosts, not Bob himself!
+
+* We have that information back in the original `all_elements` FiveThirtyEight dataset, but not this one.
+
+* That naturally leads us to...
+
+# Joining the Two Datasets
+
+* We are eventually interested in comparing the color features from the `painting_colors` dataframe to various features of the FiveThirtyEight `all_elements` dataframe.
+
+* We need to `join` the two datasets together.
+
+* However, the dataframes don't share a variable or variables that we can join by... yet.
+
+* In addition, we want to only use the paintings where Bob Ross was the host.
+
+* So, our strategy will be the following:
+
+  - Use string commands to create `season` and `episode` variables in the `painting_elements` data set
+  - Keep only the columns `painting_title`, `season`, `episode`, `num_colors`, and specific color columns (from `Black_Gesso` to `Alizarin_Crimson`) from the `painting_colors` data set.
+  - Use `left_join()` to add columns from the modified `painting_colors` to `painting_elements`.
+
+```{r}
+painting_elements %>% 
+  select(EPISODE, TITLE)
+
+painting_colors %>% 
+  select(season, episode, painting_title)
+```
+
+> Write code to create a common variable or variables across the two dataframes, and then join them. Save this joined dataframe as `ross``.
+
+```{r}
+# Split EPISODE into episode and season in painting_elements
+painting_elements = painting_elements %>% 
+  mutate(season = as.numeric(str_sub(EPISODE, 2, 3)),
+         episode = as.numeric(str_sub(EPISODE, 5, 6)),
+         .after = EPISODE)
+
+painting_elements
+
+# Select desired columns from painting_colors
+
+painting_colors_temp = painting_colors %>% 
+  select(season, episode, painting_title, num_colors,
+         Black_Gesso:Alizarin_Crimson)
+
+# Join the data sets and put the title columns next to each other
+
+ross = painting_elements %>% 
+  left_join(painting_colors_temp, by = join_by(season, episode)) %>% 
+  relocate(painting_title, .after = TITLE)
+
+## Eliminate redundant columns, rename EPISODE
+
+ross = ross %>% 
+  select(-TITLE) %>% 
+  rename(ID = EPISODE)
+```
+
+- The `ross` data set should have 381 rows and 71 columns.
+
+# Statistical Inference
+
+* We will use `ross` to investigate some inference questions.
+
+When we do inference, we are thinking of the data as being sampled from a larger population.
+We have complete data from the entire run of *The Joy of Painting*.
+For the inference problems here:
+
+- We consider the large hypothetical population of potential paintings that lived in Bob Ross's imagination which he might have elected to paint on the show.
+
+- We pretend that the process through which he decided which paintings to create for the show behaves like a random sampling process from this hypothetical population of his imagination.
+
+There can certainly be criticism of these assumptions,
+but please suspend disbelief as we use this data to practice the mechanics and interpretations of statistical inference.
+
+
+
+## Single Proportions
+
+> Construct an Agresti-Coull confidence interval for the true percentage/chance that a man-made `STRUCTURE` appears in a given painting.
+
+> Before you do so, consider the BINS assumptions.
+
+* We consider the observed episodes to be a sample of a larger, hypothetical population, infinitely many episodes of the show had it continued forever.
+
+* Recall that an $1-\alpha$% confidence interval for the true $p$ asserts the true model is:
+
+$$
+X \sim \text{Binom}(n, p)
+$$
+
+where $X$ is the observed number of successes, $n$ is the pre-determined, fixed number of trials, and $p$ is the parameter of interest, the true probability a structure appears.
+
+We would have to check the **BINS** assumptions, where:
+
+- **B**inary trials is satisfied; there either is a structure or there is not.
+- **I**ndependence is hesitantly satisfied; we can assume the episodes are not related to each other, though we may have to ask an expert to confirm there were no "themed" seasons or similar.
+- **N**, fixed sample size, is satisfied: there are exactly 381 episodes.
+- **S**ame probability is also hesitantly satisfied for the same reason as independence. 
+
+> We will model this constant $p$ as something that exists in Bob Ross' head, as some underlying random data generating process.
+
+---
+
+* Then, the form of the confidence interval is:
+
+$$
+\hat{p}_{AC} \pm \text{qnorm}(1-\alpha+\alpha/2) * \sqrt{\frac{\hat{p}_{AC}(1-\hat{p}_{AC})}{n+4}}
+$$
+
+where $1-\alpha$ is your confidence level (e.g. confidence level 95% means $\alpha = 0.05$), and
+
+$$
+\hat{p}_{AC} = \frac{X + 2}{n +4}
+$$
+
+---
+
+```{r}
+# Write your code here!
+structure_summary = ross %>% 
+  summarize(structures = sum(STRUCTURE),
+    n = n())
+
+structure_summary
+
+# Three inputs; successes, sample size, confidence level
+x = structure_summary$structures
+n = structure_summary$n
+alpha = 0.05
+phat = x/n
+
+c(x,n,phat)
+
+# Calculate AC confidence interval
+x_adjusted = x+2 # Added two successes
+n_adjusted = n+4 # Added four data points total
+ptilde = x_adjusted/n_adjusted
+se = sqrt(ptilde * (1 - ptilde)/n_adjusted)  # Changes carry through to p_hat and n_adjusted
+z = qnorm(1 - alpha + alpha/2)
+moe = z * se
+
+c(ptilde, se, z, moe)
+
+left = ptilde - moe
+right = ptilde + moe
+  
+c(left, right)
+```
+
+> We are 95% confident the true long-run probability that a man-made structure is painted in a Bobb Ross TJOP episode is between 18.2% and 26.5%. 
+
+---
+
+> Conduct a two-sided hypothesis test to assess the evidence that the true percentage of a `STRUCTURE` appearing is 20%.
+
+*Note: From the confidence interval above, we should not be rejecting the null hypothesis here; the data are consistent with 20% being the true probability, we should get a p-value > 0.05.*
+
+*Note II: This example is like the psychic example from week 11, with a non-0.5 null value of p causing the null distribution to be asymmetric.*
+
+* The model and assumptions were reviewed in the previous section; they are stated and met in the solutions file, hence we move right onto the hypotheses.
+
+**Step 2: State hypotheses.**
+
+$$
+H_0: p = 0.2
+$$
+
+$$
+H_A: p \neq 0.2
+$$
+
+**Step 3: Identify your test statistic and its sampling distribution.**
+
+*Recall that single-proportion inference uses N(0,1) for confidence intervals and Binom(n, p) for hypothesis testing; this is the only type of inference where they're different.*
+
+* Our test statistic, the function of the sample whose distribution is known under the null hypothesis, is just $X$.
+
+* When $H_0: p = 0.2$ is true, the null distribution of $X$ is:
+
+$$
+X \sim \text{Binom}(381, 0.2)
+$$
+
+**Step 4: Identify relevant outcomes from the data and the alternative hypothesis.**
+
+* We observe $X = 84$ successes.
+
+* Because $H_a: p \neq 0.2$ is two-sided, we identify the outcomes which are LESS likely than $X = 84$.
+
+```{r}
+gbinom(381, 0.2, scale = TRUE) +
+  geom_vline(xintercept = 84)
+```
+
+* This sampling distribution may look symmetric.. but it is not!
+
+* We are looking for the outcomes whose probability are less than or equal to:
+
+```{r}
+dbinom(84, 381, 0.2)
+```
+
+* Naturally, this includes 84 and greater, but the left tail is a little harder to find:
+
+* Zooming in on the center of the graph:
+
+```{r}
+gbinom(381, 0.2, a = 64, b = 86) +
+  geom_hline(yintercept = dbinom(84, 381, 0.2),
+             alpha = 0.2)
+```
+
+* 68 is the last outcome on the left with lower probability than the observed outcome of 84.
+
+```{r}
+dbinom(84, 381, 0.2)
+dbinom(68, 381, 0.2)
+```
+
+
+* Thus, our set of interest is **84 and greater**, as well as **68 and lower**.
+
+**Step 5: Calculate p-value.**
+
+* The area of **84 and greater** and **68 and lower** on $Binom(381, 0.2)$ is:
+
+```{r}
+1 - pbinom(84 - 1, 381, 0.2) + pbinom(68, 381, 0.2)
+```
+
+**Step 6: Interpret in context.**
+
+> We fail to find evidence against the true probability of a man-made structure appearing in a TJOP painting being 20%. (p-value = 0.34, two-sided single proportion test)
+
+or, 
+
+> The data are consistent with the true probability of a man-made structure appearing in a TJOP painting being 20%. (p-value = 0.34, two-sided single proportion test)
+
+## Difference in Proportions
+
+Is there an association between the appearance of a man-made structure and the appearance of grass in a painting?
+
+Consider two populations: paintings in our hypothetical population with and without grass.
+Let $p_1$ represent the population proportion of paintings with man-made structures **among paintings which include grass** and $p_2$ be the same proportion **among paintings without grass**.
+
+> Construct a confidence interval for the difference in true proportions of a man-made structure appearing in Bob Ross paintings with and without grass.
+
+```{r}
+prob3 = ross %>% 
+  group_by(GRASS) %>% 
+  summarize(x = sum(STRUCTURE),
+            n = n(),
+            phat = x/n,
+            ptilde = (x+1) / (n+2))
+
+prob3
+```
+
+- Here is a base R calculation of the test statistic and p-value
+
+```{r}
+x1 = 23
+n1 = 137
+x2 = 61
+n2 = 244
+
+# Confidence level
+alpha = 0.05
+
+# We will use "tilde" to refer to the AC-adjusted statistics
+# This code computes the AC Confidence Interval for the true difference in two proportions
+ntilde1 = n1 + 2
+ntilde2 = n2 + 2
+ptilde1 = (x1+1)/ntilde1
+ptilde2 = (x2+1)/ntilde2
+
+pe = ptilde1 - ptilde2
+
+se1 = sqrt( ptilde1*(1-ptilde1)/ntilde1 )
+se2 = sqrt( ptilde2*(1-ptilde2)/ntilde2 )
+se = sqrt(se1^2 + se2^2 )
+z = qnorm(1 - alpha + alpha/2)
+moe = z * se
+
+c(pe, se, z, moe)
+
+left = pe - moe
+right = pe + moe
+
+c(left, right)
+```
+
+> We are 95% confident that the difference in population proportions of paintings with a man-made structure between paintings with grass and without grass is between $-0.162$ and 0.003.
+
+By comparison, here is some tidyverse code for the same calculations.
+
+```{r}
+prob3_ci = prob3 %>% 
+  mutate(xtilde = x+1,
+         ntilde = n+2,
+         ptilde = xtilde / ntilde,
+         se = sqrt(ptilde * (1-ptilde) / ntilde)) %>% 
+  summarize(est = diff(ptilde),
+            se = sqrt(sum(se^2)),
+            z = qnorm(0.975),
+            moe = z*se,
+            low = est - moe,
+            high = est + moe)
+
+prob3_ci
+
+prob3_ci %>% 
+  select(low, high) %>% 
+  as.data.frame()
+
+```
+
+---
+
+
+> Conduct a hypothesis test to assess the evidence that the probability of a man-made structure appearing in a Bob Ross painting is DIFFERENT between those paintings with and without grass.
+
+```{r}
+# Write your code here!
+prob4 = ross %>% 
+  group_by(GRASS) %>% 
+  summarize(x = sum(STRUCTURE),
+            n = n(),
+            phat = x/n)
+
+prob4
+```
+
+
+```{r}
+x1 = 23
+n1 = 137
+x2 = 61
+n2 = 244
+
+pbar = (x1 + x2)/(n1+n2)
+
+numerator = (x1/n1) - (x2/n2)
+se = sqrt((pbar*(1-pbar)/n1) + (pbar*(1-pbar)/n2))
+c(numerator, se)
+
+test_stat = numerator/se
+test_stat
+
+# test_stat is negative! We want area to its left doubled
+2 * pnorm(test_stat)
+2 * (1 - pnorm(-test_stat))
+```
+
+> We find a lack of statistically significant evidence for a difference in the true population proportions of Bob Ross TJOP paintings with a man-made structure appearing between paintings with and without mountains (p = 0.064, two-sided difference in proportions test). 
+
+- Note here that 0 is in a 95% confidence interval for $p_1 - p_2$, but near the boundary and the p-value is slightly larger than 0.05.
+
+## Single Mean
+
+> Compute a confidence interval for the true average number of colors used in a TJOP painting.
+
+```{r}
+colors_summary = ross %>% 
+  summarize(xbar = mean(num_colors),
+            s = sd(num_colors), 
+            n = n())
+
+colors_summary
+
+xbar = colors_summary$xbar
+s = colors_summary$s
+n = colors_summary$n
+alpha = 0.05
+
+se = s / sqrt(n)
+
+moe = qt(1 - alpha + alpha/2, df = n - 1) * se
+
+left = xbar - moe
+right = xbar + moe
+
+c(left, right)
+
+t.test(ross$num_colors)
+```
+
+> We are 95% confident that the true average number of colors used in a TJOP painting is between 10.41 and 10.88.
+
+> Conduct a hypothesis test to assess the evidence for the true average number of colors used in a TJOP painting being exactly 8.
+
+```{r}
+test_stat = (xbar - 8) / se
+# We can get the left tail p-value without even checking if test_stat is positive or negative by inputting -abs(test_stat) for the cutoff in pt(). -abs(test_stat) is always the negative version of test_stat, no matter what it started as.
+2 * pt(-abs(test_stat), df = n - 1)
+
+# the p-value won't display for < 2.2e-16, but it's stored in there under "p.value".
+t.test(ross$num_colors, mu = 8)$p.value
+```
+
+> We find very strong evidence the true average number of colors used in a TJOP paiting is not 8 (p $\approx$ 0, two-sided one-sample t-test).
+
+## Difference in Means
+
+> Conduct a hypothesis test to assess the evidence for a difference in true average number of colors used in Bob Ross TJOP paintings with and without grass.
+
+```{r}
+colors_summary = ross %>%
+  group_by(GRASS) %>%
+  summarize(xbar = mean(num_colors),
+            s = sd(num_colors), 
+            n = n())
+
+colors_summary
+
+xbar = colors_summary$xbar[1]
+ybar = colors_summary$xbar[2]
+sx = colors_summary$s[1]
+sy = colors_summary$s[2]
+nx = colors_summary$n[1]
+ny = colors_summary$n[2]
+
+se = sqrt(sx^2/nx + sy^2/ny)
+
+test_stat = ((xbar-ybar) - 0)/se
+
+W = (sx^2/nx + sy^2/ny)^2 / (sx^4/(nx^2*(nx-1)) + sy^4/(ny^2*(ny-1))) 
+
+# We don't ask you to calculate this by hand; you could use t.test() to get this. Yes, this sorta defeats the point of doing it by hand, since t.test() gives you everything anyway.
+
+2 * pt(-abs(test_stat), df = W)
+
+t.test(num_colors ~ GRASS, ross)
+```
+
+> There is very strong evidence that there is a difference in the number of colors used in the Bob Ross TJOP populations in paintings with and without grass ($p < 10^{-10}$, two-sided independent two-sample t-test).
+
+---
+
+
+> Compute a confidence interval for the difference in true average number of colors used in Bob Ross TJOP between those with and without grass.
+
+```{r}
+alpha = 0.05 # 95% confidence interval
+point_estimate = xbar - ybar
+se = sqrt(sx^2/nx + sy^2/ny)
+W = (sx^2/nx + sy^2/ny)^2 / (sx^4/(nx^2*(nx-1)) + sy^4/(ny^2*(ny-1)))
+
+moe = qt(1-alpha + alpha/2, df = W) * se
+
+left = point_estimate - moe
+right = point_estimate + moe
+
+c(left, right)
+
+t.test(num_colors ~ GRASS, ross)
+```
+
+> We are 95% confident the difference between the population mean number of colors used in Bob Ross TJOP paintings with grass is between $0.36$ and $1.84$ higher than for paintings without grass.
+
+## Linear Regression
+
+> Using the joined data set, conduct a hypothesis test for a true linear relationship between the number of features (as Y) in a painting and the number of colors (as X).
+
+- We have the number of colors for each painting.
+- Sum up the number of features from the long format of the data.
+
+```{r}
+prob5 = ross %>% 
+  select(ID, num_colors, AURORA_BOREALIS:WINTER) %>% 
+  pivot_longer(AURORA_BOREALIS:WINTER,
+               names_to = "feature",
+               values_to = "count") %>% 
+  group_by(ID, num_colors) %>% 
+  summarize(num_features = sum(count))
+
+prob5
+```
+
+
+### Visualize the data
+
+```{r}
+ggplot(prob5, aes(x = num_colors, y = num_features)) +
+  geom_point(position = position_jitter(height = 0.2, width = 0.2),
+             pch = ".") +
+  geom_smooth(method = "lm") +
+  labs(
+    x = "# of colors",
+    y = "# of features",
+    title = "Bob Ross The Joy of Painting"
+  )
+```
+
+> Informally, there is a slight decline in the mean number of features as the number of colors in a Bob Ross painting increases.
+
+Note we used small plotting characters (`pch = "."` and position jittering to lessen the overplotting of points).
+
+```{r}
+### lm() approach
+fit_sum = summary(lm(num_features ~ num_colors, prob5))
+fit_sum
+```
+
+
+```{r}
+# Calculating the beta 1 estimate (slope) manually:
+x = prob5$num_colors
+y = prob5$num_features
+
+beta_hat_1 = cor(x, y) * sd(y) / sd(x)
+beta_hat_1
+```
+
+
+> There is strong evidence of a negative relationship between the number of colors and number of features in the population of Bob Ross TJOP paintings (p = 0.009, two-sided t-test for simple linear regression).
+
+- Note the effect does not seem so important despite the statistical significance: an increase in 8 colors predicts a decrease of about 1 feature, on average.
+
+
+---
+
+> Compute a confidence interval for the true slope of the line from the hypothesis test.
+
+```{r}
+se = coef(fit_sum) %>% 
+  as_tibble() %>% 
+  filter(row_number() == 2) %>% 
+  pull(`Std. Error`)
+se
+
+alpha = 0.05
+beta_hat_1 + c(-1, 1) * qt(1 - alpha + alpha/2, df = n -2) * se
+```
+
+> We are 95% confident the true slope of the line relating the number of colors used in a TJOP episode and the number of features in the painting is between roughly $-0.22$ and -0.03$ features per color
