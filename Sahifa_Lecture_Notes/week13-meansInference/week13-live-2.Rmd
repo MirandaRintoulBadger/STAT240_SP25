@@ -1,0 +1,221 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = TRUE,
+                      error = TRUE, fig.height = 4)
+library(tidyverse)
+source("../../scripts/ggprob.R")
+
+```
+
+## Boston Marathon Data
+### Inference for a Difference in Means
+
+### Read the Data
+
+- This is code taken from the lecture notes which does substantial cleaning of the raw data.
+
+```{r}
+bm_orig = read_table("../../data/TIM.txt",
+                col_types = cols(.default = col_double()))
+
+bm = bm_orig %>% 
+  filter(!is.na(`K40-Fin`)) %>% 
+  filter(Year < 2013) %>% 
+  arrange(Year, BibNum) %>% 
+  select(-starts_with("Start"), -HalfMar, -Age2014) %>% 
+  mutate(Sex = case_when(
+    Gender1F2M == 1 ~ "female",
+    Gender1F2M == 2 ~ "male")) %>% 
+  mutate(Time = pmap_dbl(select(., starts_with("K")), sum)) %>% 
+  mutate(age1 = case_when(
+    Age < 35 ~ 18,
+    Age >= 80 ~ 80,
+    TRUE ~ floor(Age/5)*5),
+    age2 = case_when(
+      Age < 35 ~ 34,
+      TRUE ~ age1 + 4),
+    Age_Range = case_when(
+      age1 == 80 ~ "80 and older",
+      TRUE ~ str_c(age1,"-",age2))) %>% 
+  select(-Gender1F2M, -age1, -age2) %>% 
+  relocate(BibNum, Year, Sex, Age, Age_Range, Time)
+```
+
+### Data for comparing 2010 and 2011 women
+
+- Create a single data frame in a long format with one row per runner for these two years combined.
+
+```{r}
+prob1 = bm %>% 
+  filter(Sex == "female" & Age_Range == "18-34" &
+           between(Year, 2010, 2011)) %>% 
+  select(Year, Sex, Age, Age_Range, Time)
+
+glimpse(prob1)
+
+print(prob1, n = 10)
+```
+
+### EDA
+
+#### Plots
+
+```{r}
+ggplot(prob1, aes(x = Time, y = as.factor(Year))) +
+  geom_boxplot()
+
+ggplot(prob1, aes(x = Time, color = as.factor(Year))) +
+  geom_density() +
+  geom_hline(yintercept = 0)
+```
+
+- Note that both plots show very similar distributions of observed times for the two years with similar centers, spread, skewness, and shape.
+
+#### Numerical Summaries
+
+```{r}
+prob1_sum = prob1 %>% 
+  group_by(Year) %>% 
+  summarize(mean = mean(Time),
+            sd = sd(Time),
+            n = n(),
+            se = sd / sqrt(n))
+
+prob1_sum %>% 
+  as.data.frame()
+```
+
+- The mean in 2010 is slightly smaller (faster) than the mean in 2011.
+- Sample standard deviations are quite similar
+  - About 36 minutes is typical for individual times to differ from the mean
+  - About 0.61 minutes (close to 37 seconds) is typical for a sample mean (of over 3500 individual times) to differ from the (unknown) population mean.
+  
+#### CI Calculations Using Tidyverse Commands
+
+```{r}
+### Point estimate = difference in sample means
+### Note that diff() calculates x[2] - x[1], so -diff() will show x[1] - x[2]
+
+est = prob1_sum %>% 
+  summarize(est = -diff(mean)) %>% 
+  pull(est)
+
+est
+  
+### standard error
+  
+se = prob1_sum %>% 
+  summarize(se = sqrt(sum(se^2))) %>% 
+  pull(se)
+
+se
+
+### Welch degrees of freedom
+
+df = prob1_sum %>% 
+  summarize(df = sum(se^2)^2 / sum(se^4 / (n-1))) %>% 
+  pull(df)
+
+df
+
+### Quantile
+
+t_crit = qt(0.975, df)
+
+t_crit
+              
+
+#### Confidence Interval
+ci = est + c(-1,1) * t_crit * se
+ci
+```
+
+### CI Using t.test()
+
+- First, get a base R vector with each sample
+
+```{r}
+times_2010 = prob1 %>% 
+  filter(Year == 2010) %>% 
+  pull(Time)
+
+times_2011 = prob1 %>% 
+  filter(Year == 2011) %>% 
+  pull(Time)
+```
+
+- Then, use `t.test()`.
+
+```{r}
+t.test(times_2010, times_2011)
+```
+
+- Note this is **much easier** than doing the calculation by hand.
+
+#### Interpretation
+
+> We are 95% confident that the true difference in population means for the times of female Boston Marathon finishers (2010 - 2011) is between $-1.42$ and 1.96 minutes.
+
+- In other words, it is plausible (at a 95% confidence level) for the population mean from 2010 to be from 1.42 minutes smaller (faster) than to 1.96 minutes greater (slower) than the corresponding 2011 population mean.
+- Note that the value 0 is in the interval, meaning no mean difference between the two years is one of many plausible explanations of the data.
+
+#### Notes
+
+- The sample means were 235.51 minutes in 2010 and 235.23 minutes in 2011, a difference of about 0.28 minutes, or about 17 seconds.
+  - In a race where the mean finishing time is nearly four hours, a shift of about 17 seconds in the mean finish time is not important.
+- The individual sample standard deviations are 36.2 and 36.6 minutes.
+  - It is not at all unusual for individual's finish times to be more than 70 minutes (roughly 2 standard deviations) from the mean.
+- The large sample sizes (3557 in 2010, 3580 in 2011) mean that the standard errors of the sample means are both about 0.61 minutes, or 37 seconds.
+- The standard error of the difference in sample means is about 0.86 minutes, or nearly 52 seconds.
+  - This implies that just by chance, it would not be that unusual for the observed difference in sample mean times to differ from the true population mean difference by nearly a minute.
+- The Welch degrees of freedom, 7134.8, is very close to the sum of the two individual sample degrees of freedom, 7135.
+  - This is because the sample sizes and standard deviations are both very close to each other.
+  
+### Hypothesis Test for $\mu_1 - \mu_2$
+
+$H_0: \mu_1 = \mu_2$    
+$H_a: \mu_1 \neq \mu_2$
+
+Test statistic and null sampling distribution
+
+$$
+T = \frac{\bar{x}_1 - \bar{x}_2}{ \sqrt{ \frac{s_1^2}{n_1} + \frac{s_2^2}{n_2}} } \sim t_{\text{Welch df}}
+$$
+
+- The t test statistic measures the number of standard errors that the difference in sample means is from zero, the null difference in population means.
+
+Calculate.
+
+```{r}
+est
+se
+t_stat = (est - 0) / se
+t_stat
+```
+
+- In this case, the t test statistic is easily explained by chance as it is only about 0.32 SEs from zero.
+
+#### p-value
+
+- Visualize the p-value 
+
+```{r}
+gt(7134.8) +
+  geom_t_fill(b = -t_stat, df = 7134.8) +
+  geom_t_fill(a = t_stat, df = 7134.8)
+```
+
+- Calculate the p-value
+
+```{r}
+p_value = pt(-t_stat, df) * 2
+p_value
+```
+
+- This is not a small p-value. The chance of observing the test statistic or something even more extreme is 75%.
+- Observing something that might happen 75% of the time is not at all unusual and chance alone can explain the discrepency.
+
+### Interpretation
+
+> There is a lack of evidence to indicate a difference in the population mean finish times between women aged 18--34 in the 2010 and 2011 Boston marathons ($p = 0.75$, Welch two-independent t test, $t = 0.32$, $df = 7134.8$).
+
+
