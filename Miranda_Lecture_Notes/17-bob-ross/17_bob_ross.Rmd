@@ -405,6 +405,8 @@ colors_summary <- ross %>%
 ```{r}
 # Write code here!
 
+
+w = (s1^2/n1 + s2^2/n2)^2 / (s1^4/(n1^2*(n1-1)) + s2^4/(n2^2*(n2-1))) 
 ```
 
 * Compute a 95% confidence interval for the difference in true average number of colors used in TJOP episodes hosted by Bob Ross versus episodes hosted by guests.
