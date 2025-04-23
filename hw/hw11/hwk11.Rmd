@@ -71,7 +71,7 @@ with $\alpha = 0.05$.  Check your results with `t.test`.
 
 # Problem 7
 
-Repeat the test in problem 6, but instead write hypotheses for $\mu_{HHC} - \mu_{ESCU}$ (the order of subtraction is switched).  Show that you get identical results to problem 5.
+Repeat the test in problem 6, but instead write hypotheses for $\mu_{HHC} - \mu_{ESCU}$ (the order of subtraction is switched).  Show that you get identical results to problem 6.
 
 
 # Problem 8
