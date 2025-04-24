@@ -1,0 +1,122 @@
+---
+title: "Discussion 11 Solution"
+output: html_document
+---
+
+# Present Group Members
+
+Please **write the names of the present group members** here.
+
+> Present Group Members:
+
+> Absent Group Members:
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      error = TRUE, 
+                      warning = FALSE, 
+                      message = FALSE)
+library(tidyverse)
+source("../../scripts/ggprob.R")
+```
+
+# Preliminaries
+
+-   This file should be in `STAT240/discussion/ds11` on your local computer.
+
+-   This assignment should be completed in your **assigned Canvas groups**. Only one person has to submit on behalf of the group. You may submit whatever you have at the end of discussion section for full credit.
+
+-   This assignment is to be completed in the first 10-20 mins of the discussion session. The rest of the discussion time the students are to work on the group projects with their discussion groups.
+
+## Problems
+
+The questions in this discussion assignment use the chimpanzee data set.
+In answering these questions, you may assume the following in models for the data:
+
+1. all trials are independent
+2. trials made with a partner have the same chance of being pro-social, even if the identities of the actors or partners differ.
+
+## Problem 1
+
+**Part(a)**
+
+Using the chimpanzee data, combine all of the trials made without a partner.
+
+Count the number of pro-social and selfish choices made.
+
+> Solution
+
+```{r}
+chimps = read_csv("../../data/chimpanzee.csv")
+
+prob1 = chimps %>% 
+  filter(partner == "none") %>% 
+  summarize(prosocial = sum(prosocial),
+            selfish = sum(selfish),
+            n = prosocial + selfish)
+
+prob1
+```
+
+**Part(b)**
+
+Write a model for the number of pro-social choices.
+
+$X$ is the number of pro-social choices made without a partner. $p$ is the probability of making the pro-social choice without a partner present. The number of trials is $n=180$.
+
+$$𝑋\sim \text{Binom}(180,p)$$
+
+From the sample, we get $x=83$.
+
+
+**Part(c)**
+
+Use the Agresti-Coull method to construct a 95% confidence interval for the probability that a chimpanzee makes the pro-social choice in experimental conditions when there is no partner present.
+
+```{r}
+x = 83
+n = 180
+p_hat_AC = (x+2)/(n+4)
+se = sqrt(p_hat_AC*(1-p_hat_AC)/(n+4))
+cv = qnorm(0.975)
+ci = p_hat_AC + c(-1,1)*cv*se
+ci
+```
+
+
+**Part(d)**
+
+Interpret this confidence interval in the context of the experimental setting.
+
+> We are 95% confident that chimpanzees make the pro-social choice with no partner present in the experimental conditions between 38.99 and 53.40 percent of the time.
+
+## Problem 2
+
+Using the same data as in the previous problem,
+do the following.
+
+**Part(a)**
+
+State hypotheses for a two-sided hypothesis test that the probability that a chimpanzee makes the pro-social choice over the long run is equal to 0.5.
+
+> $$H_0: p = 0.5 \\ H_{\alpha}: p \neq 0.5$$
+
+
+**Part(b)**
+
+Pick a test statistic, state the sampling distribution of this statistic if the null hypothesis is true, and compute a p-value for the test.
+
+```{r}
+p_value <- 2*pbinom(83, 180, 0.5)
+p_value
+```
+
+**Part(c)**
+
+Interpret these results in the context of the experiment following the examples from lecture notes.
+
+> The observed data is consistent with the null hypothesis that chimpanzees make the pro-social choice 50% of the time with no partner present ($p=0.33$, two-sided binomial test).
+
+### Please use rest of your time to work on the project proposal in your groups. Come up with an appropriate dataset, a question to ask, and some ideas of how to proceed. 
+
+
