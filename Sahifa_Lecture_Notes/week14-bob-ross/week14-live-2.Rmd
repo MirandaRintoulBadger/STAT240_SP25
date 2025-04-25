@@ -1,0 +1,198 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = TRUE,
+                      error = TRUE, fig.height = 4)
+library(tidyverse)
+source("../../scripts/ggprob.R")
+
+```
+## Bob Ross The Joy of Painting Case Study (Review)
+
+### Read elements data
+
+```{r}
+all_elements = read_csv("../../data/elements-by-episode.csv")
+
+all_elements
+```
+
+> Are the titles unique?
+
+```{r}
+all_elements %>% 
+  count(TITLE) %>% 
+  filter(n > 1)
+```
+
+- No, two titles were repeated twice each.
+
+> Find episodes with a repeated title
+
+```{r}
+repeated_titles = all_elements %>% 
+  count(TITLE) %>% 
+  filter(n > 1) %>% 
+  pull(TITLE)
+
+all_elements %>%
+  filter(TITLE %in% repeated_titles) %>% 
+  select(EPISODE, TITLE)
+```
+
+#### semi-join() solution
+
+```{r}
+repeated_titles_df = all_elements %>% 
+  count(TITLE) %>% 
+  filter(n > 1)
+
+all_elements %>% 
+  semi_join(repeated_titles_df, join_by(TITLE)) %>% 
+  select(EPISODE, TITLE)
+```
+
+> Create a data frame with only Bob Ross hosted paintings and no host or frame variables.
+
+```{r}
+painting_elements = all_elements %>% 
+  filter(GUEST == 0) %>% 
+  select(-GUEST, -DIANE_ANDRE, -STEVE_ROSS, -FRAMED,
+         -contains("_FRAME"))
+
+painting_elements
+```
+
+> Write code which counts the number of times each feature appears.
+
+### Approach #1 across()
+
+```{r}
+feature_counts = painting_elements %>% 
+ # summarize(AURORA_BOREALIS = sum(AURORA_BOREALIS))
+  summarize(across(AURORA_BOREALIS:WINTER, sum ))
+
+feature_counts = painting_elements %>% 
+ # summarize(AURORA_BOREALIS = sum(AURORA_BOREALIS))
+  summarize(across(AURORA_BOREALIS:WINTER, sum))
+
+### Example with more than one function
+#  summarize(across(AURORA_BOREALIS:WINTER, list(sum = sum, mean = mean)))
+
+feature_counts
+```
+
+
+### Approach #2 pivot_longer()
+
+- Get counts and percentages
+- Arrange in order from high to low
+
+```{r}
+painting_elements_long = painting_elements %>% 
+  pivot_longer(AURORA_BOREALIS:WINTER,
+               names_to = "feature",
+               values_to = "value")
+
+feature_counts = painting_elements_long %>% 
+  group_by(feature) %>% 
+  summarize(n = sum(value),
+            pct = round(100*mean(value))) %>% 
+  arrange(desc(n))
+
+feature_counts
+```
+
+
+### Visualize counts
+
+- basic bar plot
+
+```{r}
+ggplot(feature_counts, aes(x = pct, y = feature)) +
+  geom_col()
+```
+
+- change the order of the features
+
+```{r}
+ggplot(feature_counts, aes(x = pct,
+                           y = reorder(feature, pct))) +
+  geom_col()
+```
+
+- add better labels
+- custom theme (complicated)
+
+```{r}
+ggplot(feature_counts, aes(x = pct,
+                           y = reorder(feature, pct))) +
+  geom_col() +
+  labs(
+    title = "The Paintings of Bob Ross",
+    subtitle = "Percentage containing each element",
+    x = "",
+    y = ""
+  ) +
+  ### lots of control, hard to learn
+  theme(
+    panel.grid = element_blank(),
+    axis.text.x = element_blank(),
+    plot.background = element_rect(fill = "gray96", color = "gray96"),
+    plot.title.position = "plot",
+    plot.title = element_text(face = "bold")
+  )
+```
+
+- filter for pct >= 2
+- add % numbers
+
+```{r}
+feature_counts %>% 
+  filter(pct > 1) %>% 
+ggplot( aes(x = pct,
+                           y = reorder(feature, pct))) +
+  geom_col() +
+  ### See solution in notes for a better way!
+  geom_text(aes(x = pct + 5, label = pct)) +
+  labs(
+    title = "The Paintings of Bob Ross",
+    subtitle = "Percentage containing each element",
+    x = "",
+    y = ""
+  ) +
+  ### lots of control, hard to learn
+  theme(
+    panel.grid = element_blank(),
+    axis.text.x = element_blank(),
+    plot.background = element_rect(fill = "gray96", color = "gray96"),
+    plot.title.position = "plot",
+    plot.title = element_text(face = "bold")
+  )
+```
+
+- Even more can be done;;; see the notes
+
+### Painting Colors
+
+- New data with the colors used in each episode
+
+#### Read the data
+
+```{r}
+painting_colors = read_csv("../../data/bob_ross_paintings.csv")
+```
+
+### Visualize num_colors
+
+- histogram
+  - always specify `binwidt`h and either `boundary` or `center`
+  - also good to specify `color` (edge color) and `fill` (interior color)
+
+```{r}
+ggplot(painting_colors, aes(x = num_colors)) +
+  geom_histogram(center = 1, binwidth = 1,
+                 color = "black", fill = "hotpink")
+  
+```
+
+... to be continued
+
