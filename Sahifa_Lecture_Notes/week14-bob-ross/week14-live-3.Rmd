@@ -1,0 +1,293 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = TRUE,
+                      error = TRUE, fig.height = 4)
+library(tidyverse)
+source("../../scripts/ggprob.R")
+
+```
+## Bob Ross The Joy of Painting Case Study (Review)
+
+### Read elements data
+
+```{r}
+all_elements = read_csv("../../data/elements-by-episode.csv")
+
+all_elements
+```
+
+> Are the titles unique?
+
+```{r}
+all_elements %>% 
+  count(TITLE) %>% 
+  filter(n > 1)
+```
+
+- No, two titles were repeated twice each.
+
+> Find episodes with a repeated title
+
+```{r}
+repeated_titles = all_elements %>% 
+  count(TITLE) %>% 
+  filter(n > 1) %>% 
+  pull(TITLE)
+
+all_elements %>%
+  filter(TITLE %in% repeated_titles) %>% 
+  select(EPISODE, TITLE)
+```
+
+#### semi-join() solution
+
+```{r}
+repeated_titles_df = all_elements %>% 
+  count(TITLE) %>% 
+  filter(n > 1)
+
+all_elements %>% 
+  semi_join(repeated_titles_df, join_by(TITLE)) %>% 
+  select(EPISODE, TITLE)
+```
+
+> Create a data frame with only Bob Ross hosted paintings and no host or frame variables.
+
+```{r}
+painting_elements = all_elements %>% 
+  filter(GUEST == 0) %>% 
+  select(-GUEST, -DIANE_ANDRE, -STEVE_ROSS, -FRAMED,
+         -contains("_FRAME"))
+
+painting_elements
+```
+
+> Write code which counts the number of times each feature appears.
+
+### Approach #1 across()
+
+```{r}
+feature_counts = painting_elements %>% 
+ # summarize(AURORA_BOREALIS = sum(AURORA_BOREALIS))
+  summarize(across(AURORA_BOREALIS:WINTER, sum ))
+
+feature_counts = painting_elements %>% 
+ # summarize(AURORA_BOREALIS = sum(AURORA_BOREALIS))
+  summarize(across(AURORA_BOREALIS:WINTER, sum))
+
+### Example with more than one function
+#  summarize(across(AURORA_BOREALIS:WINTER, list(sum = sum, mean = mean)))
+
+feature_counts
+```
+
+
+### Approach #2 pivot_longer()
+
+- Get counts and percentages
+- Arrange in order from high to low
+
+```{r}
+painting_elements_long = painting_elements %>% 
+  pivot_longer(AURORA_BOREALIS:WINTER,
+               names_to = "feature",
+               values_to = "value")
+
+feature_counts = painting_elements_long %>% 
+  group_by(feature) %>% 
+  summarize(n = sum(value),
+            pct = round(100*mean(value))) %>% 
+  arrange(desc(n))
+
+feature_counts
+```
+
+
+### Visualize counts
+
+- basic bar plot
+
+```{r}
+ggplot(feature_counts, aes(x = pct, y = feature)) +
+  geom_col()
+```
+
+- change the order of the features
+
+```{r}
+ggplot(feature_counts, aes(x = pct,
+                           y = reorder(feature, pct))) +
+  geom_col()
+```
+
+- add better labels
+- custom theme (complicated)
+
+```{r}
+ggplot(feature_counts, aes(x = pct,
+                           y = reorder(feature, pct))) +
+  geom_col() +
+  labs(
+    title = "The Paintings of Bob Ross",
+    subtitle = "Percentage containing each element",
+    x = "",
+    y = ""
+  ) +
+  ### lots of control, hard to learn
+  theme(
+    panel.grid = element_blank(),
+    axis.text.x = element_blank(),
+    plot.background = element_rect(fill = "gray96", color = "gray96"),
+    plot.title.position = "plot",
+    plot.title = element_text(face = "bold")
+  )
+```
+
+- filter for pct >= 2
+- add % numbers
+
+```{r}
+feature_counts %>% 
+  filter(pct > 1) %>% 
+ggplot( aes(x = pct,
+                           y = reorder(feature, pct))) +
+  geom_col() +
+  ### See solution in notes for a better way!
+  geom_text(aes(x = pct + 5, label = pct)) +
+  labs(
+    title = "The Paintings of Bob Ross",
+    subtitle = "Percentage containing each element",
+    x = "",
+    y = ""
+  ) +
+  ### lots of control, hard to learn
+  theme(
+    panel.grid = element_blank(),
+    axis.text.x = element_blank(),
+    plot.background = element_rect(fill = "gray96", color = "gray96"),
+    plot.title.position = "plot",
+    plot.title = element_text(face = "bold")
+  )
+```
+
+- Even more can be done;;; see the notes
+
+### Painting Colors
+
+- New data with the colors used in each episode
+
+#### Read the data
+
+```{r}
+painting_colors = read_csv("../../data/bob_ross_paintings.csv")
+```
+
+### Visualize num_colors
+
+- histogram
+  - always specify `binwidth` and either `boundary` or `center`
+  - also good to specify `color` (edge color) and `fill` (interior color)
+
+```{r}
+ggplot(painting_colors, aes(x = num_colors)) +
+  geom_histogram(center = 1, binwidth = 1,
+                 color = "black", fill = "hotpink")
+  
+```
+
+### Join data sets
+
+- Add `season` and `episode` columns to `painting_elements`
+- Then, `left_join()` with `painting_colors`
+
+```{r}
+## Add season and episode using str_sub()
+
+painting_elements = painting_elements %>% 
+  mutate(season = as.numeric(str_sub(EPISODE, 2, 3)),
+         episode = as.numeric(str_sub(EPISODE, 5, 6))) %>% 
+  relocate(season, episode, .before = EPISODE)
+
+temp_colors = painting_colors %>% 
+  select(season, episode, painting_title, num_colors,
+         Black_Gesso:Alizarin_Crimson)
+
+ross = painting_elements %>% 
+  left_join(temp_colors, join_by(season, episode)) %>% 
+  relocate(painting_title, num_colors,
+           .after = TITLE) %>% 
+  select(-TITLE) %>% 
+  rename(ID = EPISODE)
+```
+
+### Inference
+
+- 95% CI for paintings with a man-made structure
+
+```{r}
+prob1 = ross %>% 
+  summarize(n = n(),
+            ntilde = n+4,
+            x = sum(STRUCTURE),
+            xtilde = x+2,
+            phat = x/n,
+            ptilde = xtilde/ntilde,
+            se = sqrt(ptilde * (1 - ptilde) / ntilde),
+            z_crit = qnorm(0.975),
+            moe = z_crit * se,
+            low = ptilde - moe,
+            high = ptilde + moe)
+
+prob1 %>% 
+  print(width = Inf)
+
+prob1 %>% 
+  select(low, high) %>% 
+  as.data.frame()
+  
+```
+
+- 95% HT for $p$, the hypothetical population proportion of paintings with a man-made structure.
+
+$H_0: p =  0.2$  
+$H_a: p \neq 0.2$
+
+If $H_0$ is true, then $X \sim \text{Binomial}(381, 0.2)$.
+
+The observed statistic is $x = 84$.
+
+Compare to the binomial distribution:
+
+$\mathsf{E}(X) = 381 \times 0.2 \doteq `r 381*0.2`$
+
+```{r}
+expected = 381*0.2
+expected
+```
+
+$\mathsf{SE}(X) = \sqrt{ 381 \times 0.2 \times 0.8} \doteq `r round(sqrt(381*0.2*0.8),1)`$
+
+```{r}
+se = sqrt(381*0.2*0.8)
+se
+```
+
+- The observed $x = 84$ is about 1 SE above the mean, which is not unusual.
+
+- Calculate the two-sided p-value by finding $P(X \ge 84)$ for the right tail and $P(X \le 68)$ for the left tail.
+    - The notes has a likelihood-based method to determine the cutoff of the left tail.
+    - A short cut is $x=84$ is 7.8 above the mean, the mean 76.2 minus 7.8 is 68.4, so any result 68 or lower is more extreme than the observed $x=84$.
+
+- Calculate p-value from direct binomial probability calculation
+
+```{r}
+p_value = 1 - pbinom(83, 381, 0.2) + pbinom(68, 381, 0.2)
+p_value
+```
+
+> The data is consistent with the null hypothesis $p=0.2$, that the long-run proporiton of times Bob Ross includes a man-made structure in his TJOP paintings equals 0.2, (p-value = 0.33, two-sided binomial test for $p$).
+
+OR
+
+> There is a lack of sufficient statistical evidence to conclude that
+the long-run proporiton of times Bob Ross includes a man-made structure in his TJOP paintings is not equal to 0.2, $p \neq 0.2$, (p-value = 0.33, two-sided binomial test for $p$).
+
